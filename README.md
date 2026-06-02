@@ -1,6 +1,8 @@
 # Random-Reforges
 Minecraft mod for Forge 1.20.1 - Applies random reforges to your gear - works with all modded items and attributes.
 
+##Important!
+Im new to github (I mean, Ive used it to check out other projects, but never for my own projects), so Im kinda confused by all the moderation stuff. Please don't be confused by random stuff appearing/disappearing, Im really trying my best. :)
 
 ## In-game help MD
 If you prefer MD instead of the ingame GUI. :)

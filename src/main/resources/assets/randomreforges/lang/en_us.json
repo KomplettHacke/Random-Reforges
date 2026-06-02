@@ -1,0 +1,14 @@
+{
+    "item.randomreforges.reforge_core": "Reforge Core",
+    "item.randomreforges.empty_reforge_cage": "Empty Reforge Cage",
+    "block.randomreforges.empty_reforge_cage": "Empty Reforge Cage",
+    "item.randomreforges.reforge_cage": "Reforge Cage",
+    "block.randomreforges.reforge_cage": "Reforge Cage",
+    "item.randomreforges.soulless_reforge_core": "Soulless Reforge Core",
+    "key.randomreforges.open_reforge_gui": "Open Reforge GUI",
+    "key.categories.randomreforges": "Random Reforges",
+    "item.randomreforges.soulless_reforge_core.desc": "This seems like a core for a villager's soul...",
+    "item.randomreforges.reforge_core.desc": "Something ancient stirs within...",
+    "block.randomreforges.empty_reforge_cage.desc": "An empty, fragile vessel, waiting to be filled with purpose.",
+    "block.randomreforges.reforge_cage.desc": "The soul hums faintly in this fragile vessel. Place it, and let the ritual begin."
+}

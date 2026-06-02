@@ -1,0 +1,1507 @@
+{
+  "armor_half_hearted": {
+    "displayName": "Half-Hearted",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 300000,
+    "comment": "You should really focus a bit more",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": 1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_vitalized": {
+    "displayName": "Vitalized",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 5000,
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": 0,
+        "operation": "ADD",
+        "scaledBy": "minecraft:generic.armor",
+        "scaleRatio": 0.5
+      }
+    ]
+  },
+  "armor_hearty": {
+    "displayName": "Hearty",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": 2,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_warding": {
+    "displayName": "Warding",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 200000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor_toughness",
+        "amount": 1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_jagged": {
+    "displayName": "Jagged",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 200000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.01,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_spiked": {
+    "displayName": "Spiked",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 200000,
+    "comment": "Wait, Thorns 3? Oh, no. My bad",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.02,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_angry": {
+    "displayName": "Angry",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "You got ragebaited, didn't you?",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.03,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_menacing": {
+    "displayName": "Menacing",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.04,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_brisk": {
+    "displayName": "Brisk",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 200000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.01,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_hasty": {
+    "displayName": "Hasty",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "You should be careful, dont hurt your mates",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.03,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.02,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_quick": {
+    "displayName": "Quick",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.04,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_wild": {
+    "displayName": "Wild",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 200000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.01,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_rash": {
+    "displayName": "Rash",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 200000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.02,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_intrepid": {
+    "displayName": "Intrepid",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.03,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_violent": {
+    "displayName": "Violent",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.04,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_ancient": {
+    "displayName": "Ancient",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 20000,
+    "comment": "This armor has been made by the oldest of smiths and has been passed down through generations. It is said to have a soul of its own.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.02,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 20,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_improvised": {
+    "displayName": "Improvised",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 50000,
+    "comment": "Everyone has to learn the art of forging armor at some point.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": -1,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": -1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_corrupted": {
+    "displayName": "Corrupted",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 1000,
+    "comment": "The armor's soul has been tainted, granting it more power at a cost.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 0.6,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": -0.5,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_reinforced": {
+    "displayName": "Reinforced",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 50000,
+    "comment": "More armor = more armor - That's what a wise man once said after calculating for 3 hours.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_heavy": {
+    "displayName": "Heavy",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "Inertia of the mass - But hey, more armor is always good.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 1.5,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "generic.movement_speed",
+        "amount": -0.02,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_coward": {
+    "displayName": "Coward's",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 200000,
+    "comment": "Nah, no fight today.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.02,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": -3,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_tanky": {
+    "displayName": "Tanky",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 5000,
+    "comment": "You don't want to move, do you?",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 0.6,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "generic.movement_speed",
+        "amount": -0.4,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "armor_smart": {
+    "displayName": "Smart",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100000,
+    "comment": "This armor is probably smarter than 99% of humanity.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": 1,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 20,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "armor_perfect": {
+    "displayName": "Perfect",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 100,
+    "comment": "Its too perfect to actually buff you, I mean, look at it. (Nah, I just haven't added the 1% stat boost yet)",
+    "attributes": []
+  },
+  "armor_groovy": {
+    "displayName": "Groovy",
+    "appliesTo": [
+      "ARMOR"
+    ],
+    "weight": 1000,
+    "comment": "Lol, this armor is probably older than Facebook.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.speed",
+        "amount": -0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_legendary": {
+    "displayName": "Legendary",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 30000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.15,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_deadly": {
+    "displayName": "Deadly",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.15,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_vicious": {
+    "displayName": "Vicious",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_sharp": {
+    "displayName": "Sharp",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_broken": {
+    "displayName": "Broken",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.2,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_damaged": {
+    "displayName": "Damaged",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_agile": {
+    "displayName": "Agile",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_swift": {
+    "displayName": "Swift",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_sluggish": {
+    "displayName": "Sluggish",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_slow": {
+    "displayName": "Slow",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.15,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_light": {
+    "displayName": "Light",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.15,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_heavy": {
+    "displayName": "Heavy",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.2,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.15,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": -0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_improvised": {
+    "displayName": "Improvised",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 40000,
+    "comment": "Everyone has to learn the art of forging weapons at some point.",
+    "attributes": [
+      {
+        "attribute": "attributeslib:mining_speed",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_travellers": {
+    "displayName": "Traveller's",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 5000,
+    "comment": "Easy to carry around, but at what price?",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.3,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "tool_steves": {
+    "displayName": "Steve's",
+    "appliesTo": [
+      "TOOL"
+    ],
+    "weight": 1000,
+    "comment": "CHICKEN JOCKEY",
+    "attributes": [
+      {
+        "attribute": "attributeslib:mining_speed",
+        "amount": 0.3,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_legendary": {
+    "displayName": "Legendary",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 2000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.15,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_deadly": {
+    "displayName": "Deadly",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.15,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_vicious": {
+    "displayName": "Vicious",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_sharp": {
+    "displayName": "Sharp",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_broken": {
+    "displayName": "Broken",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.2,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_damaged": {
+    "displayName": "Damaged",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_agile": {
+    "displayName": "Agile",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_swift": {
+    "displayName": "Swift",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_sluggish": {
+    "displayName": "Sluggish",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_slow": {
+    "displayName": "Slow",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.15,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_light": {
+    "displayName": "Light",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.15,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_heavy": {
+    "displayName": "Heavy",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.2,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.15,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": -0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_corrupted": {
+    "displayName": "Corrupted",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 1000,
+    "comment": "The weapon's soul has been tainted, granting it more power at a cost.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 1.4,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": -0.5,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_improvised": {
+    "displayName": "Improvised",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 40000,
+    "comment": "Everyone has to learn the art of forging weapons at some point.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "weapon_oneshot": {
+    "displayName": "One-Shot",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 1000,
+    "comment": "Lol, who needs to attack twice when you can just one-shot everything?",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 15,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.4,
+        "operation": "MULTIPLY_BASE"
+      }
+    ]
+  },
+  "weapon_travellers": {
+    "displayName": "Traveller's",
+    "appliesTo": [
+      "WEAPON"
+    ],
+    "weight": 5000,
+    "comment": "Easy to carry around, but at what price?",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": -0.3,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "spellbooks_arcane": {
+    "displayName": "Arcane",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 100000,
+    "comment": "Secrets... They can make you stronger, but they can also be dangerous.",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 30,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "spellbooks_mystic": {
+    "displayName": "Mystic",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 50000,
+    "comment": "Those magic mushrooms did something, but what?",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "spellbooks_cursed": {
+    "displayName": "Cursed",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 1000,
+    "comment": "Really? You curse your own gear?",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 0.2,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.max_Health",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "spellbooks_wise": {
+    "displayName": "Wise",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 75000,
+    "comment": "Well, you are pretty smart, aren't you?",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 25,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "spellbooks_bungled": {
+    "displayName": "Bungled",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 30000,
+    "comment": "STOP SLEEPING ON THE JOB, WIZARD! You messed up the spellbook, and now it has less mana. Get back to work!",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": -0.1,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "spellbooks_chuck_norris": {
+    "displayName": "Chuck Norris'",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 1,
+    "comment": "Chuck Norris does not use spell check. If he happens to miscast a spell, Iron will re-code his mod.",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 1000,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "irons_spellbooks:spell_power",
+        "amount": 2,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "spellbooks_bloody": {
+    "displayName": "Bloody",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 10000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:blood_spell_power",
+        "amount": 0.01,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 10,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "spellbooks_ecological": {
+    "displayName": "Ecological",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 10000,
+    "comment": "100% Organic, from Steves own cultivation.",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:nature_spell_power",
+        "amount": 0.01,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 10.0,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "spellbooks_burning": {
+    "displayName": "Burning",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 10000,
+    "comment": "OK, you didn't curse your gear. But how is burning it better?",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:fire_spell_power",
+        "amount": 0.01,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 10.0,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "spellbooks_charged": {
+    "displayName": "Charged",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 1000,
+    "comment": "You're truly enlightening!",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:lightning_spell_power",
+        "amount": 0.01,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": 10.0,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "spellbooks_hypercharged": {
+    "displayName": "Hyper-Charged",
+    "appliesTo": [
+      "SPELLBOOKS"
+    ],
+    "weight": 1000,
+    "comment": "...and of course you had to exaggerate again.",
+    "attributes": [
+      {
+        "attribute": "irons_spellbooks:lightning_spell_power",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "irons_spellbooks:max_mana",
+        "amount": -20.0,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "curio_vampiric": {
+    "displayName": "Vampiric",
+    "appliesTo": [
+      "CURIO"
+    ],
+    "weight": 100000,
+    "comment": "Worse bloodsuckers than the tax office",
+    "attributes": [
+      {
+        "attribute": "attributeslib:life_steal",
+        "amount": 0.01,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "curio_strong": {
+    "displayName": "Strong",
+    "appliesTo": [
+      "CURIO"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 1.0,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 0.5,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "curio_fast": {
+    "displayName": "Fast",
+    "appliesTo": [
+      "CURIO"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.03,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": -0.01,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "curio_furious": {
+    "displayName": "Furious",
+    "appliesTo": [
+      "CURIO"
+    ],
+    "weight": 100000,
+    "comment": "",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": -0.01,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.attack_speed",
+        "amount": 0.03,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "curio_enlightened": {
+    "displayName": "Enlightened",
+    "appliesTo": [
+      "CURIO"
+    ],
+    "weight": 10000,
+    "comment": "The moon is not made entirely of cheese, just a bit.",
+    "attributes": []
+  },
+  "curio_agile": {
+    "displayName": "Agile",
+    "appliesTo": [
+      "CURIO"
+    ],
+    "weight": 100000,
+    "comment": "They cant even aim, such noobs.",
+    "attributes": [
+      {
+        "attribute": "attributeslib:dodge_chance",
+        "amount": 0.05,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "special_light_weight": {
+    "displayName": "Lightweight",
+    "appliesTo": [
+      "minecraft:golden_boots",
+      "minecraft:golden_leggings",
+      "minecraft:golden_chestplate",
+      "minecraft:golden_helmet"
+    ],
+    "weight": 100,
+    "comment": "Are you sure that this armor is made of gold? It feels so light, but it doesn't seem to provide much protection.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.1,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": -1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "special_bugs_bunny": {
+    "displayName": "Bugs Bunny's",
+    "appliesTo": [
+      "BOOTS"
+    ],
+    "weight": 1,
+    "comment": "What's up, Doc?",
+    "attributes": [
+      {
+        "attribute": "forge:step_height_addition",
+        "amount": 1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "special_technoblade": {
+    "displayName": "Technoblade's",
+    "appliesTo": [
+      "minecraft:porkchop"
+    ],
+    "weight": 100000,
+    "comment": "Never forget about him.",
+    "attributes": []
+  },
+  "special_uwu": {
+    "displayName": "UwU",
+    "appliesTo": [
+      "ANY"
+    ],
+    "weight": 1,
+    "comment": "From the catgirls, for the catgirls.",
+    "attributes": []
+  },
+  "shield_sturdy": {
+    "displayName": "Sturdy",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 200000,
+    "comment": "Built to last.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "shield_guardian": {
+    "displayName": "Guardian's",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 50000,
+    "comment": "Forged by the finest smiths of the realm.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 2,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "minecraft:generic.armor_toughness",
+        "amount": 1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "shield_nimble": {
+    "displayName": "Nimble",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 150000,
+    "comment": "Light enough to not slow you down.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.02,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "shield_spiked": {
+    "displayName": "Spiked",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 100000,
+    "comment": "Blocking has never felt so aggressive.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.attack_damage",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "shield_bulky": {
+    "displayName": "Bulky",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 100000,
+    "comment": "Heavy, but reassuring.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 1.5,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": -0.03,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "shield_worn": {
+    "displayName": "Worn",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 200000,
+    "comment": "Seen better days.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": -1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "shield_cracked": {
+    "displayName": "Cracked",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 150000,
+    "comment": "One more hit and it's done for.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": -0.2,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "shield_blessed": {
+    "displayName": "Blessed",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 10000,
+    "comment": "A priest sneezed on it. Apparently that helps.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": 2,
+        "operation": "ADD"
+      },
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 1,
+        "operation": "ADD"
+      }
+    ]
+  },
+  "shield_corrupted": {
+    "displayName": "Corrupted",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 1000,
+    "comment": "Something dark lives inside this shield now.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": 0.5,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.max_health",
+        "amount": -0.25,
+        "operation": "MULTIPLY_TOTAL"
+      }
+    ]
+  },
+  "shield_cowards": {
+    "displayName": "Coward's",
+    "appliesTo": [
+      "SHIELD"
+    ],
+    "weight": 75000,
+    "comment": "Run first, block second.",
+    "attributes": [
+      {
+        "attribute": "minecraft:generic.movement_speed",
+        "amount": 0.05,
+        "operation": "MULTIPLY_TOTAL"
+      },
+      {
+        "attribute": "minecraft:generic.armor",
+        "amount": -2,
+        "operation": "ADD"
+      }
+    ]
+  }
+}

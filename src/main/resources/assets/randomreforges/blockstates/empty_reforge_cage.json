@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "": { "model": "randomreforges:block/empty_reforge_cage" }
+    }
+}

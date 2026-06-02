@@ -1,0 +1,66 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="randomreforges"
+version="3.0 Scaling Reforges + GUI fix"
+displayName="Random Reforges"
+authors="KomplettHacke"
+description='''
+Adds random reforges to items.
+'''
+
+[[dependencies.randomreforges]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.randomreforges]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="BOTH"
+
+# Irons Spellbooks required for some reforges, most reforges work without it.
+[[dependencies.randomreforges]]
+ modId="irons_spellbooks"
+ mandatory=false
+ versionRange="*"
+ ordering="NONE"
+ side="BOTH"
+
+# Curios mod for curio equipment
+[[dependencies.randomreforges]]
+ modId="curios"
+ mandatory=false
+ versionRange="*"
+ ordering="NONE"
+ side="BOTH"
+
+# GeckoLib for animations and rendering
+[[dependencies.randomreforges]]
+ modId="geckolib"
+ mandatory=false
+ versionRange="*"
+ ordering="NONE"
+ side="BOTH"
+
+# Player Animation Library for animations
+[[dependencies.randomreforges]]
+ modId="playeranimator"
+ mandatory=false
+ versionRange="*"
+ ordering="NONE"
+ side="BOTH"
+
+# Caelus API for elytra and flight mechanics
+#[[dependencies.randomreforges]]
+# modId="caelus"
+# mandatory=false
+# versionRange="*"
+# ordering="NONE"
+# side="BOTH"

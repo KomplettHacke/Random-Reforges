@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "WSW",
+        "IOI",
+        "WSW"
+    ],
+    "key": {
+        "I": {
+            "item": "minecraft:iron_bars"
+        },
+        "O":{
+            "item":"minecraft:obsidian"
+        },
+        "W":{
+            "item":"minecraft:oak_log"
+        },
+        "S":{
+            "item":"minecraft:stone"
+        }
+    },
+    "result": {
+        "item": "randomreforges:empty_reforge_cage",
+        "count": 1
+    }
+}

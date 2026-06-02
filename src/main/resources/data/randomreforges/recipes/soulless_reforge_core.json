@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "O O",
+        "X X",
+        "O O"
+    ],
+    "key": {
+        "O": {
+            "item": "minecraft:iron_nugget"
+        },
+        "X":{
+            "item":"minecraft:gold_nugget"
+        }
+    },
+    "result": {
+        "item": "randomreforges:soulless_reforge_core",
+        "count": 1
+    }
+}

@@ -15,8 +15,6 @@ public class CurioEquipEvents {
         ItemStack stack = event.getTo();
         if (stack.isEmpty()) return;
 
-        // Delegate entirely to the shared helper – isCurio=true skips NBT attribute
-        // application since CurioAttributeModifierEvent handles that instead.
         net.minecraft.world.entity.LivingEntity entity = event.getEntity();
         Events.applyInitialReforge(stack, EquipmentSlot.MAINHAND, true, entity);
     }

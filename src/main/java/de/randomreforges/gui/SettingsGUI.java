@@ -32,6 +32,10 @@ public class SettingsGUI extends Screen {
     private int itemScrollOffset  = 0;
     private int addItemButtonY    = 0;
 
+    // ── Fixed bottom buttons (rendered outside the scroll pose, like HelpGUI's Close) ──
+    private net.minecraft.client.gui.components.Button saveButton;
+    private net.minecraft.client.gui.components.Button cancelButton;
+
     // ── Outer scroll ──────────────────────────────────────────────────────────
     private int screenScrollOffset = 0;
     private int totalContentHeight = 0;
@@ -121,13 +125,16 @@ public class SettingsGUI extends Screen {
 
         y = itemPanelBottom + 16;
 
-        // ── Save / Cancel ─────────────────────────────────────────────────────
-        this.addRenderableWidget(Button.builder(Component.literal("Save"), btn -> onSave())
-                .pos(cx - 52, y).size(50, 20).build());
-        this.addRenderableWidget(Button.builder(Component.literal("Cancel"), btn -> this.onClose())
-                .pos(cx + 2, y).size(50, 20).build());
+        // ── Save / Cancel (fixed at bottom, outside scroll – see render()) ──────
+        int fixedBtnY = this.height - 28;
+        saveButton   = Button.builder(Component.literal("Save"),   btn -> onSave())
+                .pos(cx - 52, fixedBtnY).size(50, 20).build();
+        cancelButton = Button.builder(Component.literal("Cancel"), btn -> this.onClose())
+                .pos(cx + 2,  fixedBtnY).size(50, 20).build();
 
-        totalContentHeight = y + 20;
+        // Content height ends at the item panel – buttons are fixed and not scrolled.
+        // +100 px padding so the user can scroll comfortably past the last row.
+        totalContentHeight = itemPanelBottom + 16 + 100;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -162,6 +169,10 @@ public class SettingsGUI extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // Fixed buttons use unadjusted screen-space Y (not inside the scroll pose)
+        if (saveButton   != null && saveButton.mouseClicked(mouseX, mouseY, button)) return true;
+        if (cancelButton != null && cancelButton.mouseClicked(mouseX, mouseY, button)) return true;
+
         double adjustedY = mouseY + screenScrollOffset;
         boolean inPanel = adjustedY >= itemPanelTop && adjustedY <= itemPanelBottom
                        && mouseX >= itemPanelLeft && mouseX <= itemPanelRight;
@@ -231,7 +242,7 @@ public class SettingsGUI extends Screen {
         // Outer scroll via pose
         g.pose().pushPose();
         g.pose().translate(0, -screenScrollOffset, 0);
-        g.enableScissor(0, 20, this.width, this.height);
+        g.enableScissor(0, 20, this.width, this.height - 36);
 
         // ── Section 1: General ────────────────────────────────────────────────
         sectionHeader(g, lx - 11, y, "▶ General");
@@ -318,6 +329,11 @@ public class SettingsGUI extends Screen {
 
         // Outer scrollbar in screen space
         renderOuterScrollbar(g);
+        // Dark footer strip – prevents scrolled content from visually colliding with buttons
+        //g.fill(0, this.height - 36, this.width, this.height, 0xC0101010);
+        // Fixed buttons – always at the bottom of the screen, independent of scroll
+        saveButton.render(g, mouseX, mouseY, partialTick);
+        cancelButton.render(g, mouseX, mouseY, partialTick);
     }
 
     private void renderOuterScrollbar(GuiGraphics g) {

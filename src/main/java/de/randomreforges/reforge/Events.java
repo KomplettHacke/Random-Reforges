@@ -159,21 +159,23 @@ public class Events {
                     );
                 }
 
-                // Line 2: scale ratio per source attribute
+                // Line 2: "+1 [Attribute] per [1/ratio] [ScaledBy]"
+                // Inverting the ratio avoids tiny decimals (e.g. 0.001 → "per 1000 Max Mana").
                 double ratio = entry.getScaleRatio();
+                if (Math.abs(ratio) >= 1e-9) {
+                    boolean ratioPositive = ratio > 0;
+                    int ratioColor = ratioPositive ? 0x3F76E4 : 0xFF5555;
+                    String ratioSign = ratioPositive ? "+" : "-";
+                    String invText = formatNumber(1.0 / Math.abs(ratio));
 
-                boolean ratioPositive = ratio > 0;
-                String ratioSign = ratioPositive ? "+" : "-";
-                int ratioColor = ratioPositive ? 0x3F76E4 : 0xFF5555;
-                String ratioText = formatNumber(Math.abs(ratio));
-
-                event.getToolTip().add(
-                        Component.literal(ratioSign + ratioText + " ")
-                                .append(Component.translatable(attribute.getDescriptionId()))
-                                .append(Component.literal(" per "))
-                                .append(Component.literal(srcName))
-                                .withStyle(Style.EMPTY.withColor(ratioColor).withItalic(false))
-                );
+                    event.getToolTip().add(
+                            Component.literal(ratioSign + "1 ")
+                                    .append(Component.translatable(attribute.getDescriptionId()))
+                                    .append(Component.literal(" per " + invText + " "))
+                                    .append(Component.literal(srcName))
+                                    .withStyle(Style.EMPTY.withColor(ratioColor).withItalic(false))
+                    );
+                }
             } else {
                 String valueText;
 

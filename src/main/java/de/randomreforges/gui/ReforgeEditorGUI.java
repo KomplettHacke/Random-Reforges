@@ -73,8 +73,8 @@ public class ReforgeEditorGUI extends Screen {
     // ── Attribute panel scroll ────────────────────────────────────────────────
     /** Normal row height: label(9) + field(20) + gap(3) = 32 */
     private static final int ROW_STRIDE_NORMAL = 32;
-    /** Scaled row height: normal(32) + gap(8) + label(9) + field(20) + gap(3) = 72 */
-    private static final int ROW_STRIDE_SCALED = 72;
+    /** Scaled row height: normal(32) + gap(2) + label(9) + field(20) + gap(3) = 66 */
+    private static final int ROW_STRIDE_SCALED = 66;
     /** Fallback for scroll delta calculations */
     private static final int ROW_STRIDE        = ROW_STRIDE_NORMAL;
     /** How many rows are visible at once in the panel */
@@ -91,6 +91,11 @@ public class ReforgeEditorGUI extends Screen {
     private int screenScrollOffset = 0;
     /** True height of all content – computed at end of init(). */
     private int totalContentHeight = 0;
+
+    // ── Fixed bottom buttons (rendered outside the scroll pose, like HelpGUI's Close) ──
+    private net.minecraft.client.gui.components.Button saveButton;
+    private net.minecraft.client.gui.components.Button cancelButton;
+    private net.minecraft.client.gui.components.Button deleteButton; // null in New mode
 
     // ── Misc ──────────────────────────────────────────────────────────────────
     private String  errorMessage          = "";
@@ -285,31 +290,33 @@ public class ReforgeEditorGUI extends Screen {
             scaleRatioFields.add(ratioBox);
         }
 
-        // ── Buttons ───────────────────────────────────────────────────────────
-        int btnY = panelBottom + 12;
+        // ── Buttons (fixed at bottom, outside scroll – see render()) ─────────────
+        int fixedBtnY = this.height - 28;
 
         if (isNew) {
-            this.addRenderableWidget(Button.builder(Component.literal("Save"), btn -> onSave())
-                    .pos(cx - 52, btnY).size(50, 20).build());
-            this.addRenderableWidget(Button.builder(Component.literal("Cancel"), btn -> this.onClose())
-                    .pos(cx + 2,  btnY).size(50, 20).build());
+            saveButton   = Button.builder(Component.literal("Save"), btn -> onSave())
+                    .pos(cx - 52, fixedBtnY).size(50, 20).build();
+            cancelButton = Button.builder(Component.literal("Cancel"), btn -> this.onClose())
+                    .pos(cx + 2,  fixedBtnY).size(50, 20).build();
+            deleteButton = null;
         } else {
-            this.addRenderableWidget(Button.builder(
+            saveButton   = Button.builder(
                     Component.literal("Save").withStyle(Style.EMPTY.withColor(0xFFFFFF)),
                     btn -> onSave())
-                    .pos(cx - 82, btnY).size(50, 20).build());
-            this.addRenderableWidget(Button.builder(
+                    .pos(cx - 82, fixedBtnY).size(50, 20).build();
+            cancelButton = Button.builder(
                     Component.literal("Cancel").withStyle(Style.EMPTY.withColor(0xFFFFFF)),
                     btn -> this.onClose())
-                    .pos(cx - 27, btnY).size(50, 20).build());
-            this.addRenderableWidget(Button.builder(
+                    .pos(cx - 27, fixedBtnY).size(50, 20).build();
+            deleteButton = Button.builder(
                     Component.literal("Delete Reforge").withStyle(Style.EMPTY.withColor(0xFF5555)),
                     btn -> onDelete())
-                    .pos(cx + 28, btnY).size(90, 20).build());
+                    .pos(cx + 28, fixedBtnY).size(90, 20).build();
         }
 
-        // Total content height: topY is fixed at 30, so btnY is the real unscrolled position
-        totalContentHeight = btnY + 20;
+        // Content height ends at the attr panel – buttons are fixed and not scrolled.
+        // +100 px padding so the user can scroll comfortably past the last row.
+        totalContentHeight = panelBottom + 12 + 100;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -453,6 +460,10 @@ public class ReforgeEditorGUI extends Screen {
                 // SCALED uses ADD as the base operation in JSON
                 a.addProperty("operation", "ADD");
                 if (!row.scaledBy().trim().isEmpty() && !row.scaleRatio().trim().isEmpty()) {
+                    if (row.scaledBy().trim().equals(attrId)) {
+                        errorMessage = "\"Scaled By\" cannot be the same attribute as \"Attribute ID\"!";
+                        return;
+                    }
                     try {
                         double ratio = Double.parseDouble(row.scaleRatio().trim());
                         a.addProperty("scaledBy",   row.scaledBy().trim());
@@ -521,7 +532,7 @@ public class ReforgeEditorGUI extends Screen {
         // Apply outer scroll via pose – no widget rebuild needed
         graphics.pose().pushPose();
         graphics.pose().translate(0, -screenScrollOffset, 0);
-        graphics.enableScissor(0, 20, this.width, this.height);
+        graphics.enableScissor(0, 20, this.width, this.height - 36);
 
         // ── Labels ────────────────────────────────────────────────────────────
         graphics.drawString(this.font, "Reforge ID",            lx, topY + 2,   LABEL_COLOR);
@@ -545,14 +556,19 @@ public class ReforgeEditorGUI extends Screen {
         int[] rowOffsets = computeRowOffsets();
         for (int i = 0; i < attrIdFields.size(); i++) {
             int fieldY  = attrPanelTop + rowOffsets[i] - attrScrollOffset + 10;
-            boolean inView = fieldY >= attrPanelTop - FIELD_HEIGHT
-                    && fieldY + FIELD_HEIGHT <= attrPanelBottom;
+            // Relaxed: show field if it starts before panel bottom (scissor clips overflow)
+            // Fixes rows after SCALED rows being incorrectly hidden
+            boolean inView = fieldY >= attrPanelTop - FIELD_HEIGHT && fieldY < attrPanelBottom;
 
             attrIdFields.get(i).visible     = inView;
             attrValFields.get(i).visible    = inView;
             attrDropdowns.get(i).visible    = inView;
 
-            boolean scaledAndVisible = inView && attrData.get(i).isScaled();
+            // Scaled fields get their own visibility check based on their own Y position,
+            // so they remain visible even when the main row has scrolled above the panel top.
+            int scaledFieldY = fieldY + FIELD_HEIGHT + 12;
+            boolean scaledAndVisible = attrData.get(i).isScaled() &&
+                    scaledFieldY >= attrPanelTop - FIELD_HEIGHT && scaledFieldY < attrPanelBottom;
             scaledByFields.get(i).visible   = scaledAndVisible;
             scaleRatioFields.get(i).visible  = scaledAndVisible;
 
@@ -606,12 +622,12 @@ public class ReforgeEditorGUI extends Screen {
             }
         }
 
-        // Dropdown lists rendered last so they appear on top
-        for (DropdownWidget dd : attrDropdowns)
-            dd.renderDropdown(graphics, mouseX, mouseY);
-
         if (attrPanelBottom > attrPanelTop)
             graphics.disableScissor();
+
+        // Dropdown lists rendered AFTER disableScissor so they appear on top of panel border
+        for (DropdownWidget dd : attrDropdowns)
+            dd.renderDropdown(graphics, mouseX, mouseY);
 
         // ── Close outer scroll transform ──────────────────────────────────────
         graphics.disableScissor();
@@ -619,8 +635,14 @@ public class ReforgeEditorGUI extends Screen {
 
         // Outer scrollbar and error message rendered in screen space (after popPose)
         renderOuterScrollbar(graphics);
+        // Dark footer strip – prevents scrolled content from visually colliding with buttons
+        //graphics.fill(0, this.height - 36, this.width, this.height, 0xC0101010);
+        // Fixed buttons – always at the bottom of the screen, independent of scroll
+        saveButton.render(graphics, mouseX, mouseY, partialTick);
+        cancelButton.render(graphics, mouseX, mouseY, partialTick);
+        if (deleteButton != null) deleteButton.render(graphics, mouseX, mouseY, partialTick);
         if (!errorMessage.isEmpty())
-            graphics.drawCenteredString(this.font, errorMessage, cx, this.height - 28, ERROR_COLOR);
+            graphics.drawCenteredString(this.font, errorMessage, cx, this.height - 52, ERROR_COLOR);
     }
 
     private void renderOuterScrollbar(GuiGraphics g) {
@@ -667,9 +689,25 @@ public class ReforgeEditorGUI extends Screen {
         boolean inPanel  = adjustedY >= attrPanelTop && adjustedY <= attrPanelBottom
                 && mouseX >= attrPanelLeft && mouseX <= attrPanelRight + 10;
 
+        // Fixed buttons use unadjusted screen-space Y (they are not inside the scroll pose)
+        if (saveButton   != null && saveButton.mouseClicked(mouseX, mouseY, button)) return true;
+        if (cancelButton != null && cancelButton.mouseClicked(mouseX, mouseY, button)) return true;
+        if (deleteButton != null && deleteButton.mouseClicked(mouseX, mouseY, button)) return true;
+
+        // Open dropdowns get priority: their option list may extend outside the panel,
+        // so handle them before the inPanel check to avoid accidentally closing them.
         for (DropdownWidget dd : attrDropdowns) {
+            if (!dd.isOpen()) continue;
+            if (dd.mouseClicked(mouseX, adjustedY, button)) {
+                attrDropdowns.stream().filter(d -> d != dd).forEach(DropdownWidget::close);
+                return true;
+            }
+        }
+
+        // Closed dropdowns: only open them for clicks inside the panel.
+        for (DropdownWidget dd : attrDropdowns) {
+            if (dd.isOpen()) continue; // already handled above
             if (!inPanel) { dd.close(); continue; }
-            // Pass adjustedY so dropdown option bounds match widget positions
             if (dd.mouseClicked(mouseX, adjustedY, button)) {
                 attrDropdowns.stream().filter(d -> d != dd).forEach(DropdownWidget::close);
                 return true;

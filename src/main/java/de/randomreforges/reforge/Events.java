@@ -20,6 +20,8 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.item.Item;
+
 
 @Mod.EventBusSubscriber(modid = RandomReforges.MODID)
 public class Events {
@@ -255,5 +257,20 @@ public class Events {
         //dont open gui
         event.setCancellationResult(InteractionResult.SUCCESS);
         event.setCanceled(true);
+    }
+    @SubscribeEvent
+    public static void onModItemTooltip(ItemTooltipEvent event) {
+        Item item = event.getItemStack().getItem();
+
+        String key = null;
+        if      (item == ItemRegistry.SOULLESS_REFORGE_CORE.get())    key = "item.randomreforges.soulless_reforge_core.desc";
+        else if (item == ItemRegistry.REFORGE_CORE.get())              key = "item.randomreforges.reforge_core.desc";
+        else if (item == BlockRegistry.EMPTY_REFORGE_CAGE_ITEM.get()) key = "block.randomreforges.empty_reforge_cage.desc";
+        else if (item == BlockRegistry.REFORGE_CAGE_ITEM.get())       key = "block.randomreforges.reforge_cage.desc";
+
+        if (key != null) {
+            event.getToolTip().add(Component.translatable(key)
+                    .withStyle(Style.EMPTY.withColor(0x777777).withItalic(true)));
+        }
     }
 }

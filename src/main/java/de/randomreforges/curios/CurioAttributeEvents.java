@@ -12,6 +12,11 @@ import top.theillusivec4.curios.api.event.CurioAttributeModifierEvent;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 
 
+/*****************************************************************************************************************************************************************
+Task: Reforge CuriosAPI items
+Copies the "normal" reforge logic but uses another attribute appliance method as CuriosAPI comes with an integrated one.
+*****************************************************************************************************************************************************************/
+
 public class CurioAttributeEvents {
 
     @SubscribeEvent
@@ -36,7 +41,6 @@ public class CurioAttributeEvents {
             Attribute attr = entry.getAttribute();
             if (attr == null) return;
 
-            //removed random UUID, deterministic UUID as fix for permanent stats
             UUID uuid = UUID.nameUUIDFromBytes(
                 ("RandomReforges:" + reforgeId + ":" + entry.getAttributeId() + ":" + slotId)
                     .getBytes(java.nio.charset.StandardCharsets.UTF_8)

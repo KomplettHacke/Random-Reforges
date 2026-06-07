@@ -8,12 +8,17 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+
+/*****************************************************************************************************************************************************************
+This is mainly used for Scaling Reforges (like spellbooks_cursed) and to open the GUI
+*****************************************************************************************************************************************************************/
+
 @Mod.EventBusSubscriber(modid = RandomReforges.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientTickHandler {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
-        // Only check at the END of the tick, and only when no screen is open
+        
         if (event.phase != TickEvent.Phase.END) return;
 
         Minecraft mc = Minecraft.getInstance();

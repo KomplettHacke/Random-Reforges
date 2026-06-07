@@ -760,10 +760,15 @@ public class ReforgeEditorGUI extends Screen {
         screenScrollOffset = Math.max(0, Math.min(screenScrollOffset, maxScroll));
     }
 
-    /**
-     * Reapplies attributes for all equipped items that have the given reforge ID.
-     * Works in singleplayer; no-op on dedicated server clients (no server access).
-     */
+    /*****************************************************************************************************************************************************************
+    Task: Refresh all reforged items with the edited reforge
+
+    Problem used to be that the reforges changed in the tooltip (ReforgeManager.load()) but the attributes didnt get applied without applying the reforge again (/reforge, Reforge Cage).
+    1. Iterate through every players inventory and check for the items with the reforge ID.
+    2. If item found
+    2.1 Remove attributes
+    2.2 Apply attributes (CuriosAPI handles the Curios items)
+    *****************************************************************************************************************************************************************/
     private void refreshItemsWithReforge(String reforgeId) {
         if (this.minecraft == null) return;
         var server = this.minecraft.getSingleplayerServer();
@@ -788,7 +793,6 @@ public class ReforgeEditorGUI extends Screen {
                 if (!isCurio) {
                     de.randomreforges.reforge.AttributeUtil.applyAttributes(stack, inst, player);
                 }
-                // For curio items, CurioAttributeModifierEvent will pick up the change automatically
             }
         }
     }

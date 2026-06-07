@@ -18,48 +18,67 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
-/**
- * Combined New/Edit GUI for reforges.
- * Pass no argument to open in "New" mode, or a Reforge to open in "Edit" mode.
- */
+/*****************************************************************************************************************************************************************
+Combined GUI to edit and create reforges (prevents logic duplicates)
+
+The player can create and edit custom reforges here.
+Required inputs:
+- Reforge ID                            Used to identify the reforge                                        armor_ancient
+- Display Name                          The name that appears in front of the item name                     Ancient -> Ancient Netherite Chestplate
+- Chance                                Weight-based system, chance that the reforge appears                1 super rare, 100000 common, 10000000 almost guaranteed
+- Applies To                            Use pre-defined groups or the text field to add items               ARMOR
+                                        by their ID or item tags. Use "!" to blacklist groups
+
+Optional inputs:
+- Comment                               Funny (or not funny) comment shown in the tooltip                   This armor has been made by the oldest of smiths and has
+                                                                                                            been passed down through generations. It is said to have
+                                                                                                            a soul of its own.
+- Attributes                            Buffs or debuffs that the item gives while equipped.                <Pretty complicated, please check out README.md for more>
+                                        Leave empty for plain text without effect (maybe nice
+                                        for adventure maps)
+*****************************************************************************************************************************************************************/
 public class ReforgeEditorGUI extends Screen {
 
-    // ── Mode ──────────────────────────────────────────────────────────────────
-    /** null = New Reforge, non-null = Edit Reforge */
+    /*****************************************************************************************************************************************************************
+    Switch modes:
+    null = New Reforge
+    non-null = Edit Reforge
+    *****************************************************************************************************************************************************************/
     private final Reforge editing;
     private final boolean isNew;
 
-    // ── Basic fields ──────────────────────────────────────────────────────────
+    //*** Basic Fields ******************************************************
     private EditBox idField;
     private EditBox displayNameField;
     private EditBox weightField;
     private EditBox commentField;
 
-    // ── appliesTo ─────────────────────────────────────────────────────────────
+    //*** Applies To (appliesTo) ******************************************************
     private final Map<String, Checkbox> groupCheckboxes = new LinkedHashMap<>();
     private static final String[] GROUPS = {
             "WEAPON", "TOOL", "ARMOR", "BOOTS", "LEGGINGS",
             "CHESTPLATES", "HELMETS", "SHIELD", "SPELLBOOKS", "CURIO", "ANY"
     };
+    //*** Applies To (appliesTo, text input) ******************************************************
     private EditBox customAppliesToField;
 
-    /**
-     * Single source of truth for checkbox state.
-     * Populated from editing reforge in constructor, updated before every rebuild.
-     * init() reads this directly so checkboxes are always correct after rebuild.
-     */
+
+    /*****************************************************************************************************************************************************************
+    Single source of truth for checkbox state.
+    Populated from editing reforge in constructor, updated before every rebuild.
+    init() reads this directly so checkboxes are always correct after rebuild.
+    *****************************************************************************************************************************************************************/
     private final Map<String, Boolean> savedCbState = new LinkedHashMap<>();
 
-    // ── Attribute rows ────────────────────────────────────────────────────────
+    //*** Applies To (appliesTo, text input) ******************************************************
     private static final List<String> OPERATORS = List.of("ADD", "MULTIPLY_BASE", "MULTIPLY_TOTAL", "SCALED");
 
     private record AttrRowData(String attrId, String value, String operator,
                                String scaledBy, String scaleRatio) {
-        /** Blank row */
+        //empty base row
         AttrRowData() { this("", "", "ADD", "", ""); }
-        /** Non-scaled shorthand */
-        AttrRowData(String id, String val, String op) { this(id, val, op, "", ""); }
-        /** isScaled derived from operator – no separate boolean field needed */
+        //non-scaled
+        AttrRowData(String id, String val, String op) { this(id, val, op, "", "");
         boolean isScaled() { return "SCALED".equals(operator); }
     }
 
@@ -70,14 +89,13 @@ public class ReforgeEditorGUI extends Screen {
     private final List<EditBox>     scaledByFields   = new ArrayList<>();
     private final List<EditBox>     scaleRatioFields = new ArrayList<>();
 
-    // ── Attribute panel scroll ────────────────────────────────────────────────
-    /** Normal row height: label(9) + field(20) + gap(3) = 32 */
+    //*** Inner scroll (Attribute container) ******************************************************
+    // Normal row height: label(9) + field(20) + gap(3) = 32
     private static final int ROW_STRIDE_NORMAL = 32;
-    /** Scaled row height: normal(32) + gap(2) + label(9) + field(20) + gap(3) = 66 */
+    // Scaled row height: normal(32) + gap(2) + label(9) + field(20) + gap(3) = 66
     private static final int ROW_STRIDE_SCALED = 66;
-    /** Fallback for scroll delta calculations */
+    //Fallback for scroll delta calculations
     private static final int ROW_STRIDE        = ROW_STRIDE_NORMAL;
-    /** How many rows are visible at once in the panel */
     private static final int VISIBLE_ROWS      = 4;
 
     private int attrScrollOffset = 0;
@@ -86,21 +104,19 @@ public class ReforgeEditorGUI extends Screen {
     private int attrPanelLeft   = 0;
     private int attrPanelRight  = 0;
 
-    // ── Outer (whole-GUI) scroll ──────────────────────────────────────────────
-    /** Current scroll offset for the whole GUI (used when content > screen height). */
+    //*** Outer scroll (whole GUI) ******************************************************
     private int screenScrollOffset = 0;
-    /** True height of all content – computed at end of init(). */
     private int totalContentHeight = 0;
 
-    // ── Fixed bottom buttons (rendered outside the scroll pose, like HelpGUI's Close) ──
+    //*** Fixed buttons at the bottom ******************************************************
     private net.minecraft.client.gui.components.Button saveButton;
     private net.minecraft.client.gui.components.Button cancelButton;
     private net.minecraft.client.gui.components.Button deleteButton; // null in New mode
 
-    // ── Misc ──────────────────────────────────────────────────────────────────
+    //*** Misc ******************************************************
     private String  errorMessage          = "";
     private boolean needsRebuild          = false;  // dirty flag for safe deferred rebuild
-    /** Custom appliesTo string pre-built from editing reforge items/tags. */
+    //*** Custom "Applies To" string ******************************************************
     private String initialCustomAppliesTo = "";
 
     private static final int LABEL_COLOR  = 0xAAAAAA;
@@ -108,11 +124,11 @@ public class ReforgeEditorGUI extends Screen {
     private static final int FIELD_WIDTH  = 150;
     private static final int FIELD_HEIGHT = 20;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Constructors
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Constructors
+    *****************************************************************************************************************************************************************/
 
-    /** New Reforge mode */
+    //New Reforge
     public ReforgeEditorGUI() {
         super(Component.literal("New Reforge"));
         this.editing = null;
@@ -120,13 +136,13 @@ public class ReforgeEditorGUI extends Screen {
         for (String g : GROUPS) savedCbState.put(g, false);
     }
 
-    /** Edit Reforge mode */
+    //Edit Reforge
     public ReforgeEditorGUI(Reforge reforge) {
         super(Component.literal("Edit Reforge"));
         this.editing = reforge;
         this.isNew   = false;
 
-        // Pre-fill attribute rows from existing reforge
+        //Pre-fill attribute rows from existing reforge
         for (Reforge.AttributeEntry entry : reforge.getAttributes()) {
             boolean scaled  = entry.isScaled();
             String op       = scaled ? "SCALED" : entry.operation().toUpperCase();
@@ -140,7 +156,7 @@ public class ReforgeEditorGUI extends Screen {
             ));
         }
 
-        // Pre-build custom appliesTo string from individual items and tags
+        //Pre-build custom appliesTo string from individual items and tags
         List<String> customParts = new ArrayList<>();
         for (net.minecraft.world.item.Item item : reforge.getAppliesToItems()) {
             net.minecraft.resources.ResourceLocation rl =
@@ -158,9 +174,9 @@ public class ReforgeEditorGUI extends Screen {
             savedCbState.put(g, reforge.getAppliesToGroups().contains(g));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // init
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Initialization
+    *****************************************************************************************************************************************************************/
     @Override
     protected void init() {
         attrIdFields.clear();
@@ -170,11 +186,11 @@ public class ReforgeEditorGUI extends Screen {
         scaleRatioFields.clear();
 
         int cx   = this.width / 2;
-        int topY = 30;   // fixed – outer scroll applied via PoseStack in render()
+        int topY = 30;
         int lx   = cx - 190;
         int rx   = cx + 20;
 
-        // ── Left column: basic fields ─────────────────────────────────────────
+        //*** Left column (basic fields) ******************************************************
         idField = makeField(lx, topY + 14, "e.g. armor_corrupted", 64);
         if (!isNew) {
             idField.setValue(editing.getId());
@@ -197,12 +213,12 @@ public class ReforgeEditorGUI extends Screen {
         this.addRenderableWidget(weightField);
         this.addRenderableWidget(commentField);
 
-        // ── Right column: appliesTo ───────────────────────────────────────────
+        //*** Right column ("Applies To"-checkboxes) ******************************************************
         int col = 0;
         for (String group : GROUPS) {
             int x = rx + (col % 2) * 110;
             int y = topY + 14 + (col / 2) * 22;
-            // State comes from savedCbState – single source of truth
+            //single source of truth - fixed old problem of relogging on every re-render
             boolean checked = savedCbState.getOrDefault(group, false);
             Checkbox cb = new Checkbox(x, y, 100, 20, Component.literal(group), checked);
             groupCheckboxes.put(group, cb);
@@ -217,7 +233,7 @@ public class ReforgeEditorGUI extends Screen {
             customAppliesToField.setValue(initialCustomAppliesTo);
         this.addRenderableWidget(customAppliesToField);
 
-        // ── Attribute section ─────────────────────────────────────────────────
+        //*** Attribute Section******************************************************
         int attrSectionY = Math.max(topY + 158, customY + 42) + 12;
 
         this.addRenderableWidget(Button.builder(Component.literal("+ Add Attribute"), btn -> {
@@ -227,7 +243,7 @@ public class ReforgeEditorGUI extends Screen {
             needsRebuild = true;  // deferred – safe to call from click handler
         }).pos(lx, attrSectionY).size(120, 20).build());
 
-        // Panel bounds
+        //panel measurements
         int panelLeft   = lx;
         int panelTop    = attrSectionY + 28;
         int panelRight  = panelLeft + FIELD_WIDTH + 4 + 60 + 6 + 130;
@@ -246,13 +262,13 @@ public class ReforgeEditorGUI extends Screen {
             AttrRowData data   = attrData.get(i);
             int         fieldY = panelTop + rowOffsets[i] - attrScrollOffset + 10;
 
-            // Attribute ID
+            //*** ID ******************************************************
             EditBox idBox = makeField(panelLeft + 4, fieldY, "mod:attribute", 128);
             idBox.setValue(data.attrId());
             this.addRenderableWidget(idBox);
             attrIdFields.add(idBox);
 
-            // Value
+            //*** Value******************************************************
             EditBox valBox = new EditBox(this.font,
                     panelLeft + 4 + FIELD_WIDTH + 4, fieldY, 60, FIELD_HEIGHT, Component.empty());
             valBox.setMaxLength(16);
@@ -262,14 +278,14 @@ public class ReforgeEditorGUI extends Screen {
             this.addRenderableWidget(valBox);
             attrValFields.add(valBox);
 
-            // Operator dropdown
+            //*** Dropdown widget for operators ******************************************************
             DropdownWidget dd = new DropdownWidget(
                     panelLeft + 4 + FIELD_WIDTH + 70, fieldY, 130, FIELD_HEIGHT, OPERATORS);
             dd.setSelected(data.operator());
             this.addRenderableWidget(dd);
             attrDropdowns.add(dd);
 
-            // Scaled By field (only visible when operator is SCALED)
+            //*** "Scaled By" (only if operator = "SCALED") ******************************************************
             EditBox scaledByBox = makeField(panelLeft + 4, fieldY + FIELD_HEIGHT + 12,
                     "e.g. minecraft:generic.armor", 128);
             scaledByBox.setValue(data.scaledBy());
@@ -277,7 +293,7 @@ public class ReforgeEditorGUI extends Screen {
             this.addRenderableWidget(scaledByBox);
             scaledByFields.add(scaledByBox);
 
-            // Scale Ratio field (only visible when scaled)
+            //*** "Scale Ratio" (only if operator = "SCALED")) ******************************************************
             EditBox ratioBox = new EditBox(this.font,
                     panelLeft + 4 + FIELD_WIDTH + 4, fieldY + FIELD_HEIGHT + 12,
                     60, FIELD_HEIGHT, Component.empty());
@@ -290,7 +306,7 @@ public class ReforgeEditorGUI extends Screen {
             scaleRatioFields.add(ratioBox);
         }
 
-        // ── Buttons (fixed at bottom, outside scroll – see render()) ─────────────
+        //*** Buttons, fixed at the bottom ******************************************************
         int fixedBtnY = this.height - 28;
 
         if (isNew) {
@@ -314,16 +330,16 @@ public class ReforgeEditorGUI extends Screen {
                     .pos(cx + 28, fixedBtnY).size(90, 20).build();
         }
 
-        // Content height ends at the attr panel – buttons are fixed and not scrolled.
-        // +100 px padding so the user can scroll comfortably past the last row.
+
+        //totalContentHeight increased by 100px to use the dropdown widget without problems (no additional 100px would lead to hidden/not rendered dropdown widget)
         totalContentHeight = panelBottom + 12 + 100;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Attribute panel scroll helpers
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Attribute panel scroll helpers
+    *****************************************************************************************************************************************************************/
 
-    /** Cumulative Y offsets for each row, accounting for variable row heights. */
+    // Cumulative Y offsets for each row -> variable row heights possible
     private int[] computeRowOffsets() {
         int[] offsets = new int[attrData.size() + 1];
         offsets[0] = 0;
@@ -352,7 +368,7 @@ public class ReforgeEditorGUI extends Screen {
         }
     }
 
-    // ── Outer scroll ──────────────────────────────────────────────────────────
+    //*** Outer scroll - activate or deactivate ******************************************************
 
     private boolean needsOuterScroll() {
         return totalContentHeight > this.height - 10;
@@ -362,7 +378,7 @@ public class ReforgeEditorGUI extends Screen {
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         double adjustedScrollY = mouseY + screenScrollOffset;
 
-        // Attr panel gets priority
+        //set focus on inner scroll if cursor is in the attribute panel
         if (mouseX >= attrPanelLeft && mouseX <= attrPanelRight
                 && adjustedScrollY >= attrPanelTop && adjustedScrollY <= attrPanelBottom) {
             scrollAttr((int) (-delta * ROW_STRIDE));
@@ -380,9 +396,11 @@ public class ReforgeEditorGUI extends Screen {
         return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Sync / Save / Delete
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Sync
+    Save
+    Delete
+    *****************************************************************************************************************************************************************/
 
     private void syncAttrDataFromWidgets() {
         // Guard: only sync rows that have corresponding widgets
@@ -507,9 +525,9 @@ public class ReforgeEditorGUI extends Screen {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Render
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Render
+    *****************************************************************************************************************************************************************/
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
@@ -519,14 +537,14 @@ public class ReforgeEditorGUI extends Screen {
         int lx   = cx - 190;
         int rx   = cx + 20;
 
-        // Flush deferred rebuild (safe to do here, outside widget iteration)
-        // No return after rebuild – continue rendering in the same frame to avoid flicker
+        //Flush deferred rebuild (safe to do here, outside widget iteration)
+        //No return after rebuild – continue rendering in the same frame to avoid flicker
         if (needsRebuild) {
             needsRebuild = false;
             rebuildWidgets();
         }
 
-        // Title stays fixed (not scrolled)
+        //title doesnt move
         graphics.drawCenteredString(this.font, this.title, cx, 12, 0xFFFFFF);
 
         // Apply outer scroll via pose – no widget rebuild needed
@@ -534,7 +552,7 @@ public class ReforgeEditorGUI extends Screen {
         graphics.pose().translate(0, -screenScrollOffset, 0);
         graphics.enableScissor(0, 20, this.width, this.height - 36);
 
-        // ── Labels ────────────────────────────────────────────────────────────
+        //*** Labels ******************************************************
         graphics.drawString(this.font, "Reforge ID",            lx, topY + 2,   LABEL_COLOR);
         graphics.drawString(this.font, "Display Name",          lx, topY + 38,  LABEL_COLOR);
         graphics.drawString(this.font, "Chance",                lx, topY + 74,  LABEL_COLOR);
@@ -545,10 +563,10 @@ public class ReforgeEditorGUI extends Screen {
         int customY = topY + 14 + cbRows * 22 + 8;
         graphics.drawString(this.font, "Custom (items / tags):", rx, customY,   LABEL_COLOR);
 
-        // Column divider
+        //divider between text inputs and "Applies To"-checkboxes
         graphics.fill(cx + 10, topY, cx + 11, topY + 175, 0x44FFFFFF);
 
-        // ── Attribute panel ───────────────────────────────────────────────────
+        //*** Attribute panel ******************************************************
         drawPanelBorder(graphics);
         renderAttrScrollbar(graphics);
 
@@ -556,33 +574,28 @@ public class ReforgeEditorGUI extends Screen {
         int[] rowOffsets = computeRowOffsets();
         for (int i = 0; i < attrIdFields.size(); i++) {
             int fieldY  = attrPanelTop + rowOffsets[i] - attrScrollOffset + 10;
-            // Relaxed: show field if it starts before panel bottom (scissor clips overflow)
-            // Fixes rows after SCALED rows being incorrectly hidden
+            
             boolean inView = fieldY >= attrPanelTop - FIELD_HEIGHT && fieldY < attrPanelBottom;
 
             attrIdFields.get(i).visible     = inView;
             attrValFields.get(i).visible    = inView;
             attrDropdowns.get(i).visible    = inView;
-
-            // Scaled fields get their own visibility check based on their own Y position,
-            // so they remain visible even when the main row has scrolled above the panel top.
+            //Fixed not rendering input fields of second row (scaled) if the first row is not in the container:
+            //Scaled fields get their own visibility check based on their own Y position, so they remain visible even when the main row has scrolled above the panel top.
             int scaledFieldY = fieldY + FIELD_HEIGHT + 12;
             boolean scaledAndVisible = attrData.get(i).isScaled() &&
                     scaledFieldY >= attrPanelTop - FIELD_HEIGHT && scaledFieldY < attrPanelBottom;
             scaledByFields.get(i).visible   = scaledAndVisible;
             scaleRatioFields.get(i).visible  = scaledAndVisible;
 
-            // Detect SCALED operator change → deferred rebuild to show/hide extra fields
+            //Detect SCALED operator change -> rebuild to hide/show extra fields
             if (attrDropdowns.get(i).getSelected().equals("SCALED") != attrData.get(i).isScaled()) {
                 syncAttrDataFromWidgets();
                 needsRebuild = true;
             }
         }
 
-        // Render all widgets (inside pose translation)
         super.render(graphics, mouseX, mouseY, partialTick);
-
-        // Inner scissor must be in screen space (subtract outer scroll offset)
         if (attrPanelBottom > attrPanelTop)
             graphics.enableScissor(
                     attrPanelLeft,
@@ -590,7 +603,6 @@ public class ReforgeEditorGUI extends Screen {
                     attrPanelRight  + 10,
                     attrPanelBottom - screenScrollOffset);
 
-        // Row labels inside the panel
         for (int i = 0; i < attrData.size(); i++) {
             int rowTop = attrPanelTop + rowOffsets[i] - attrScrollOffset;
             int stride = attrData.get(i).isScaled() ? ROW_STRIDE_SCALED : ROW_STRIDE_NORMAL;
@@ -602,7 +614,7 @@ public class ReforgeEditorGUI extends Screen {
             graphics.drawString(this.font,
                     attrData.get(i).isScaled() ? "Base Value" : "Value",
                     attrPanelLeft + 4 + FIELD_WIDTH + 4,  rowTop, LABEL_COLOR);
-            // Hide "Operator" label if any dropdown is open and overlaps this row
+            //Hide "Operator" label if any dropdown is open and overlaps this row - rendering the dropdown widget on top of the text didnt work for some reason
             boolean operatorLabelHidden = attrDropdowns.stream().anyMatch(dd -> {
                 if (!dd.isOpen()) return false;
                 int ddBottom = dd.getY() + dd.getHeight() + dd.getOptions().size() * 14;
@@ -625,19 +637,16 @@ public class ReforgeEditorGUI extends Screen {
         if (attrPanelBottom > attrPanelTop)
             graphics.disableScissor();
 
-        // Dropdown lists rendered AFTER disableScissor so they appear on top of panel border
+        //Dropdown widget needs to be able to be rendered outside of the attribute container: disableScissor -> Render -> disableScissor again
         for (DropdownWidget dd : attrDropdowns)
             dd.renderDropdown(graphics, mouseX, mouseY);
 
-        // ── Close outer scroll transform ──────────────────────────────────────
+        //*** Close outer scroll ******************************************************
         graphics.disableScissor();
         graphics.pose().popPose();
-
-        // Outer scrollbar and error message rendered in screen space (after popPose)
         renderOuterScrollbar(graphics);
-        // Dark footer strip – prevents scrolled content from visually colliding with buttons
-        //graphics.fill(0, this.height - 36, this.width, this.height, 0xC0101010);
-        // Fixed buttons – always at the bottom of the screen, independent of scroll
+
+        //*** Fixed buttons at the bottom ******************************************************
         saveButton.render(graphics, mouseX, mouseY, partialTick);
         cancelButton.render(graphics, mouseX, mouseY, partialTick);
         if (deleteButton != null) deleteButton.render(graphics, mouseX, mouseY, partialTick);
@@ -679,23 +688,20 @@ public class ReforgeEditorGUI extends Screen {
         g.fill(x, thumbY,       x + 4, thumbY + thumbH,  0xAAFFFFFF);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Mouse input
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Mouse input (LC)
+    *****************************************************************************************************************************************************************/
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Adjust Y by outer scroll so widgets at their true positions get correct hits
         double adjustedY = mouseY + screenScrollOffset;
         boolean inPanel  = adjustedY >= attrPanelTop && adjustedY <= attrPanelBottom
                 && mouseX >= attrPanelLeft && mouseX <= attrPanelRight + 10;
 
-        // Fixed buttons use unadjusted screen-space Y (they are not inside the scroll pose)
         if (saveButton   != null && saveButton.mouseClicked(mouseX, mouseY, button)) return true;
         if (cancelButton != null && cancelButton.mouseClicked(mouseX, mouseY, button)) return true;
         if (deleteButton != null && deleteButton.mouseClicked(mouseX, mouseY, button)) return true;
 
-        // Open dropdowns get priority: their option list may extend outside the panel,
-        // so handle them before the inPanel check to avoid accidentally closing them.
+
         for (DropdownWidget dd : attrDropdowns) {
             if (!dd.isOpen()) continue;
             if (dd.mouseClicked(mouseX, adjustedY, button)) {
@@ -704,7 +710,6 @@ public class ReforgeEditorGUI extends Screen {
             }
         }
 
-        // Closed dropdowns: only open them for clicks inside the panel.
         for (DropdownWidget dd : attrDropdowns) {
             if (dd.isOpen()) continue; // already handled above
             if (!inPanel) { dd.close(); continue; }
@@ -722,9 +727,11 @@ public class ReforgeEditorGUI extends Screen {
         return super.mouseClicked(mouseX, adjustedY, button);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Helpers
+
+    TODO: makeField -> own file GUIHelpers?
+    *****************************************************************************************************************************************************************/
     private EditBox makeField(int x, int y, String hint, int maxLen) {
         EditBox box = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.empty());
         box.setMaxLength(maxLen);
@@ -734,7 +741,6 @@ public class ReforgeEditorGUI extends Screen {
     }
 
     protected void rebuildWidgets() {
-        // Sync attr rows and checkbox state into their persistent stores before clearing
         syncAttrDataFromWidgets();
         if (!groupCheckboxes.isEmpty())
             groupCheckboxes.forEach((k, v) -> savedCbState.put(k, v.selected()));
@@ -747,7 +753,7 @@ public class ReforgeEditorGUI extends Screen {
 
         clearWidgets();
         groupCheckboxes.clear();
-        init();  // reads savedCbState and attrData directly
+        init();
 
         if (isNew) idField.setValue(savedId);
         displayNameField.setValue(savedName);
@@ -755,7 +761,6 @@ public class ReforgeEditorGUI extends Screen {
         commentField.setValue(savedC);
         customAppliesToField.setValue(savedCA);
 
-        // Clamp scroll offset in case content height changed after rebuild
         int maxScroll = Math.max(0, totalContentHeight - this.height + 10);
         screenScrollOffset = Math.max(0, Math.min(screenScrollOffset, maxScroll));
     }

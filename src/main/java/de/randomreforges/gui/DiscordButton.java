@@ -10,7 +10,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class DiscordButton extends AbstractButton {
-
+    /*****************************************************************************************************************************************************************
+    Small button in the top-left corner in my GUI (check out ReforgeListGUI) with invitation to my discord server (Hey, feel free to join)
+    *****************************************************************************************************************************************************************/
     private static final ResourceLocation TEXTURE =
             new ResourceLocation("randomreforges", "textures/gui/discord.png");
 

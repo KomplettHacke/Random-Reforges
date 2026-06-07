@@ -22,7 +22,13 @@ public class EmptyReforgeCageBlock extends Block {
         super(properties);
     }
 
-    //non-solid block
+    /*****************************************************************************************************************************************************************
+    Block properties:
+    - non-solid
+    - shape gets ignored by shaders
+    - does not block sunlight
+    - completely transparent for light
+    *****************************************************************************************************************************************************************/
     public boolean isSolidRender(BlockState state, BlockGetter level, BlockPos pos) {
         return false;
     }
@@ -42,14 +48,22 @@ public class EmptyReforgeCageBlock extends Block {
         return 0;
     }
 
-
+    /*****************************************************************************************************************************************************************
+    Task: Use Reforge Core to turn Empty Reforge Cage into Reforge Cage BE
+    1.    Check players held item
+    1.1   Case 1: no Reforge Core -> Interaction failed, skip
+    1.2   Case 2: Reforge Core -> next step
+    2.    Consume Reforge Core if not in creative
+    3.    Replace Empty Reforge Cage with Reforge Cage BE
+    *****************************************************************************************************************************************************************/
+    
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos,
                                  Player player, InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
 
         ItemStack held = player.getItemInHand(hand);
 
-        //holding reforge core?
+
         if (held.is(ItemRegistry.REFORGE_CORE.get())) {
 
             level.playSound(null, pos,
@@ -57,10 +71,8 @@ public class EmptyReforgeCageBlock extends Block {
                 net.minecraft.sounds.SoundSource.BLOCKS,
                 1.0f, 1.2f);
 
-            //replace block
             level.setBlock(pos, BlockRegistry.REFORGE_CAGE.get().defaultBlockState(), 3);
 
-            //delete 1 item
             if (!player.isCreative()) {
                 held.shrink(1);
             }

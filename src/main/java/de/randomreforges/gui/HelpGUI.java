@@ -9,7 +9,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
 public class HelpGUI extends Screen {
-
+    /*****************************************************************************************************************************************************************
+    - Can be accessed via a button in the top right corner in the main page of the GUI (check ReforgeListGUI)
+    - explains the mechanics of the mod
+    - 1:1 README.md but formatted
+    - Splitted in 3 parts:
+        Top:    reserved for title
+        Middle: actual content (scrollable)
+        Footer: for all the buttons
+    *****************************************************************************************************************************************************************/
     private static final int TEXT_COLOR   = 0xFFFFFF;
     private static final int HEADER_COLOR = 0xFFDD00;
     private static final int MUTED_COLOR  = 0xAAAAAA;
@@ -18,14 +26,12 @@ public class HelpGUI extends Screen {
     private static final int LINE_HEIGHT  = 11;
     private static final int SCROLL_SPEED = LINE_HEIGHT * 3;
 
-    /** Current scroll offset in pixels (always >= 0). */
-    private int scrollOffset = 0;
 
-    /** Total height of all rendered content – measured on first render. */
+    private int scrollOffset = 0;
     private int contentHeight = 0;
 
     public HelpGUI() {
-        super(Component.literal("Help"));
+        super(Component.literal("Help"));        //TODO: Titel verschwindet immer wieder. In 3.0.2 beheben. Nochmal alle GUIs genau überprüfen
     }
 
     @Override
@@ -46,21 +52,21 @@ public class HelpGUI extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
 
-        // Scrollable content area: top=14, bottom=this.height-36 (leaves room for Close button)
+        //Scrollable content - TODO: Fix the var names and the pixels (check ReforgeListGUI)
         int contentTop    = 14;
         int contentBottom = this.height - 36;
 
-        // Enable scissor so content is clipped to the scroll area
+        //only work in the scrollable area
         graphics.enableScissor(0, contentTop, this.width, contentBottom);
 
         int x = PADDING;
         int y = contentTop - scrollOffset;  // shift everything up by scrollOffset
 
-        // Title
+        //*** Title ******************************************************
         graphics.drawCenteredString(this.font, this.title, this.width / 2, y, TEXT_COLOR);
         y += LINE_HEIGHT + 6;
 
-        // ── Reforge ID ────────────────────────────────────────────────────────
+        //*** Reforge ID ******************************************************
         y = section(graphics, x, y, "Reforge ID",
             "An unique internal identifier for the reforge.",
             "Only lowercase letters, numbers and underscores are allowed.",
@@ -69,13 +75,13 @@ public class HelpGUI extends Screen {
             "Used by the /reforge apply <id> command to force-apply a specific reforge."
         );
 
-        // ── Display Name ──────────────────────────────────────────────────────
+        //*** Display Name ******************************************************
         y = section(graphics, x, y, "Display Name",
             "The name shown in-game on the item and in the reforge list.",
             "Example:  Corrupted,  Legendary"
         );
 
-        // ── Weight (Chance) ───────────────────────────────────────────────────
+        //*** Weight ******************************************************
         y = section(graphics, x, y, "Weight (Chance)",
             "Controls how often this reforge is rolled compared to others.",
             "  0||→  never appears",
@@ -86,7 +92,7 @@ public class HelpGUI extends Screen {
             "each has an equal probability."
         );
 
-        // ── Reforge List ──────────────────────────────────────────────────────
+        //*** Reforge List ******************************************************
         y = section(graphics, x, y, "Reforge List",
             "The Reforge List shows all loaded reforges.",
             "Each entry displays:",
@@ -103,13 +109,13 @@ public class HelpGUI extends Screen {
             "can appear in."
         );
 
-        // ── Comment ───────────────────────────────────────────────────────────
+        //*** Tooltip comments ******************************************************
         y = section(graphics, x, y, "Comment",
             "Optional text shown below the item name in the tooltip.",
             "Leave empty for no comment."
         );
 
-        // ── Applies To ────────────────────────────────────────────────────────
+        //*** Applies To ******************************************************
         y = section(graphics, x, y, "Applies To",
             "Defines which items can receive this reforge.",
             "  WEAPON",
@@ -133,7 +139,7 @@ public class HelpGUI extends Screen {
             "Note: \"Applies To\" does not restrict the /reforge apply command."
         );
 
-        // ── Attributes ────────────────────────────────────────────────────────
+        //*** Attributes and operators ******************************************************
         y = section(graphics, x, y, "Attributes",
             "Stat modifiers granted by the reforge when the item is equipped.",
             "Each attribute entry has three fields:",
@@ -155,22 +161,22 @@ public class HelpGUI extends Screen {
             "  ||gives a bonus depending on another attribute."
         );
 
-        // Record total content height (y is now past the last line, before offset)
+        //total content height (y is now past the last line, before offset)
         contentHeight = (y + scrollOffset) - contentTop;
 
         graphics.disableScissor();
 
-        // Scrollbar
         renderScrollbar(graphics, contentTop, contentBottom);
 
-        // Render fixed widgets (Close button) on top
+        //render close button in fixed area
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Scrollbar
-    // ─────────────────────────────────────────────────────────────────────────
-
+    /*****************************************************************************************************************************************************************
+    Used in every GUI
+    TODO: own file -> no more logic duplicates    (Jede Scrollbar sieht unterschiedlich aus... DRINGEND BEHEBEN! 3.0.2!)
+    *****************************************************************************************************************************************************************/
+    
     private void renderScrollbar(GuiGraphics graphics, int top, int bottom) {
         int visibleHeight = bottom - top;
         if (contentHeight <= visibleHeight) return; // no scrollbar needed
@@ -181,16 +187,13 @@ public class HelpGUI extends Screen {
         int maxScroll    = contentHeight - visibleHeight;
         int thumbY       = top + (scrollOffset * (trackHeight - thumbHeight)) / maxScroll;
 
-        // Track
+        //scroll track
         graphics.fill(barX, top, barX + 4, bottom, 0x44FFFFFF);
-        // Thumb
+        //scroll thumb
         graphics.fill(barX, thumbY, barX + 4, thumbY + thumbHeight, 0xAAFFFFFF);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Scroll input
-    // ─────────────────────────────────────────────────────────────────────────
-
+    //Scroll function
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         scroll((int) (-delta * SCROLL_SPEED));
@@ -220,14 +223,11 @@ public class HelpGUI extends Screen {
         return Math.max(0, contentHeight - visibleHeight);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Section helper
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Renders a labelled section with indented lines.
-     * Pass null as a line to insert a blank line.
-     */
+    /*****************************************************************************************************************************************************************
+    Used to render all the articles in the help menu
+    - "||" splits a line into a fixed part (left side) and th right columns.
+        - right columns are moved in by 150px (custom tabstop)
+    *****************************************************************************************************************************************************************/
     private int section(GuiGraphics g, int x, int startY,
                         String header, String... lines) {
         int y = startY;
@@ -244,13 +244,12 @@ public class HelpGUI extends Screen {
                 y += LINE_HEIGHT / 2;
                 continue;
             }
-            // "||" splits a line into left (fixed) and right columns
+
             if (line.contains("||")) {
                 String[] parts = line.split("\\|\\|", 2);
                 g.drawString(this.font,
                         Component.literal(parts[0]).withStyle(Style.EMPTY.withColor(CODE_COLOR)),
                         x + 6, y, CODE_COLOR, false);
-                //fixed X = x + 150
                 g.drawString(this.font,
                         Component.literal(parts[1]).withStyle(Style.EMPTY.withColor(CODE_COLOR)),
                         x + 150, y, CODE_COLOR, false);
@@ -264,8 +263,8 @@ public class HelpGUI extends Screen {
                     x + 6, y, color, false);
             y += LINE_HEIGHT;
         }
-
-        y += 6; // gap after section
+        //Small gap after each section
+        y += 6;
         return y;
     }
 

@@ -29,7 +29,16 @@ public class ReforgeCageBlock extends BaseEntityBlock {
         return new ReforgeCageBlockEntity(pos, state);
     }
 
-    // non-solid block
+    
+    /*****************************************************************************************************************************************************************
+    Block properties:
+    - non-solid
+    - shape gets ignored by shaders
+    - does not block sunlight
+    - completely transparent for light
+    *****************************************************************************************************************************************************************/
+
+    
     public boolean isSolidRender(BlockState state, BlockGetter level, BlockPos pos) {
         return false;
     }
@@ -49,17 +58,39 @@ public class ReforgeCageBlock extends BaseEntityBlock {
         return 0;
     }
 
+
+    
+    /*****************************************************************************************************************************************************************
+    Task: Rightclick Reforge Cage BE to reroll the reforge on the held item (Logic server-side only)
+    1.    Check if the item is already reforged
+          - prevents trying to reforge items that cant have reforges
+          - prevents trying to reforge items that got their reforge cleard with /reforge <player> clear
+    2.    Get all the costs (saved in config/randomreforges/settings.json, ReforgeManager reads them)
+    2.1   Case 1:    No costs (xp = 0 or xp = null, items = null) -> go to 5 (skip material and Creative mode check)
+    2.2   Case 2:    Costs something -> go to next step
+    3.    Check if player is in Creative mode:
+    3.1   Case 1:    Yes -> go to 5 (skip material check)
+    3.2   Case 2:    No -> go to next step
+    4.    Check if player has enough levels and items
+    4.1   Case 1:    No -> Error message and Interaction fail
+    4.2   Case 2:    Yes -> Remove items and xp, go to next step
+    5.    Choose new random reforge
+    6.    Update NBT and Item tags
+    7.    Check if CuriosAPI is loaded (They have their own attribute appliance and is handled completely by CuriosAPI itself. Check out java/de/randomreforges/curios)
+    8.    Remove attributes from old reforge
+    9.    If the item isnt a Curio, apply the new reforge
+    (some sounds)
+    *****************************************************************************************************************************************************************/
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos,
                                  Player player, InteractionHand hand,
                                  net.minecraft.world.phys.BlockHitResult hit) {
 
-        //logic only serverside
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         ItemStack held = player.getItemInHand(hand);
 
-        //maybe delete it?
+        
         CompoundTag tag = held.getTag();
         if (tag == null || !tag.contains("RandomReforges")) {
             return InteractionResult.PASS;
@@ -70,7 +101,6 @@ public class ReforgeCageBlock extends BaseEntityBlock {
             return InteractionResult.PASS;
         }
 
-        // ── Cost check ────────────────────────────────────────────────────────
         int    costLevels = ReforgeManager.getRerollCostLevels();
         String costItem   = ReforgeManager.getRerollCostItem();
         int    costAmount = ReforgeManager.getRerollCostItemAmount();
@@ -108,7 +138,6 @@ public class ReforgeCageBlock extends BaseEntityBlock {
         Reforge newReforge = ReforgeManager.getRandomApplicableReforge(held, slot);
         if (newReforge == null) return InteractionResult.PASS;
 
-        // ── Deduct costs ─────────────────────────────────────────────────────
         if (!player.isCreative()) {
             if (needLevels) player.giveExperienceLevels(-costLevels);
             if (needItem)   consumeCostItem(player, costItem, costAmount);
@@ -116,14 +145,11 @@ public class ReforgeCageBlock extends BaseEntityBlock {
 
         ReforgeInstance newInst = new ReforgeInstance(newReforge);
 
-        // Update NBT
         tag.put("RandomReforges", newInst.serializeNBT());
         held.setTag(tag);
 
-        // Update item name
         held.setHoverName(newInst.getDisplayName(held));
 
-        //curios reforges have their own attribute appliance
         boolean isCurio = ModList.get().isLoaded("curios")
                 && de.randomreforges.curios.CuriosUtil.isCurioItem(held);
 
@@ -145,11 +171,10 @@ public class ReforgeCageBlock extends BaseEntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    /**
-     * Finds a matching ItemStack in the player's inventory.
-     * Supports "namespace:item" and "#namespace:tag".
-     * Returns null if the player doesn't have enough.
-     */
+    /*****************************************************************************************************************************************************************
+    Task: Find the stack with the items needed to reroll (needed to remove them after Reforge Cage BE interaction)
+    Works with tags (filtering if it starts with "#") and item IDs
+    *****************************************************************************************************************************************************************/
     private net.minecraft.world.item.ItemStack findCostItem(Player player, String itemStr, int amount) {
         if (itemStr.startsWith("#")) {
             net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag =
@@ -175,7 +200,10 @@ public class ReforgeCageBlock extends BaseEntityBlock {
         return null;
     }
 
-    /** Removes the cost items from the player's inventory. */
+    /*****************************************************************************************************************************************************************
+    Task: Consume the items needed to reroll (used for Reforge Cage BE interaction)
+    Clears the item slots detected by findCostItem
+    *****************************************************************************************************************************************************************/
     private void consumeCostItem(Player player, String itemStr, int amount) {
         int remaining = amount;
         for (int i = 0; i < player.getInventory().getContainerSize() && remaining > 0; i++) {

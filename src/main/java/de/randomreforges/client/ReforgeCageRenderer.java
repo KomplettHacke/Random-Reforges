@@ -13,6 +13,11 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
+
+
+/*****************************************************************************************************************************************************************
+Renders the Reforge Cage BE core animation
+*****************************************************************************************************************************************************************/
 public class ReforgeCageRenderer implements BlockEntityRenderer<ReforgeCageBlockEntity> {
 
     private static final ResourceLocation TEXTURE =

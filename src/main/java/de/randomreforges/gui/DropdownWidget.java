@@ -8,11 +8,14 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
-/**
- * Simple dropdown widget. Click to open, click option to select.
- * Renders the dropdown list on top of other widgets, so call renderDropdown()
- * AFTER super.render() in your Screen.
- */
+
+/*****************************************************************************************************************************************************************
+Dropdown widget used in ReforgeEditorGUI to select the operators (Will also be used in SettingsGUI later)
+Important! Always after super.render() to render it on top of everything
+
+Click to open, click to select - I mean, how else, lol
+*****************************************************************************************************************************************************************/
+
 public class DropdownWidget extends AbstractWidget {
 
     private final List<String> options;
@@ -49,7 +52,7 @@ public class DropdownWidget extends AbstractWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!active || !visible) return false;
 
-        // Click on main button → toggle open/close
+        //Main button -> Open/Close
         if (isMouseOver(mouseX, mouseY)) {
             open = !open;
             return true;
@@ -66,13 +69,13 @@ public class DropdownWidget extends AbstractWidget {
                     return true;
                 }
             }
-            // Click outside → close
+            // Click outside -> close
             open = false;
         }
         return false;
     }
 
-    /** Call this after all other widgets are rendered so the list appears on top. */
+    
     public void renderDropdown(GuiGraphics graphics, int mouseX, int mouseY) {
         if (!open) return;
 
@@ -80,7 +83,7 @@ public class DropdownWidget extends AbstractWidget {
         int y = getY() + height;
         int w = width;
 
-        // Background + border
+        //graphic stuff (bg and border)
         graphics.fill(x - 1,     y - 1,          x + w + 1, y + options.size() * OPTION_HEIGHT + 1, BORDER_COLOR);
         graphics.fill(x,         y,               x + w,     y + options.size() * OPTION_HEIGHT,     BG_COLOR);
 
@@ -99,16 +102,16 @@ public class DropdownWidget extends AbstractWidget {
     public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         var font = Minecraft.getInstance().font;
 
-        // Button background
+        //button bg
         int bg = (isHovered && !open) ? 0xFF555555 : 0xFF333333;
         graphics.fill(getX(), getY(), getX() + width, getY() + height, 0xFF888888);
         graphics.fill(getX() + 1, getY() + 1, getX() + width - 1, getY() + height - 1, bg);
 
-        // Selected value
+        //show selected value
         String label = options.get(selectedIndex);
         graphics.drawString(font, label, getX() + 4, getY() + (height - 8) / 2, TEXT_COLOR, false);
 
-        // Arrow ▼
+        //arrow up (open)/down (closed)
         graphics.drawString(font, open ? "▲" : "▼", getX() + width - 12, getY() + (height - 8) / 2, ARROW_COLOR, false);
     }
 

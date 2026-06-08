@@ -48,7 +48,7 @@ public class ReforgeSelectionList extends ObjectSelectionList<ReforgeSelectionLi
             case "Group"        -> r.getAppliesToGroups().stream()
                                     .anyMatch(g -> g.toLowerCase().contains(query));
             case "Display Name" -> r.getName().toLowerCase().contains(query);
-            default             -> r.getId().toLowerCase().contains(query); // "Reforge ID"
+            default             -> r.getId().toLowerCase().contains(query);
         };
     }
 
@@ -70,7 +70,6 @@ public class ReforgeSelectionList extends ObjectSelectionList<ReforgeSelectionLi
     }
 
 
-    // ─────────────────────────────────────────────────────────────────────────
     public class ReforgeEntry extends Entry<ReforgeEntry> {
 
         private final Reforge reforge;
@@ -88,16 +87,16 @@ public class ReforgeSelectionList extends ObjectSelectionList<ReforgeSelectionLi
                 graphics.fill(left, top, left + width, top + height, 0x44FFFFFF);
             }
 
-            // Display name (white, left)
+            //Display name (white, left)
             graphics.drawString(font, reforge.getName(), left + 4, top + 4, 0xFFFFFF, false);
 
-            // ID (grey, right)
+            //ID (grey, right)
             String idText = reforge.getId();
             graphics.drawString(font,
                     Component.literal(idText).withStyle(Style.EMPTY.withColor(0x777777)),
                     left + width - font.width(idText) - 4, top + 4, 0xFFFFFF, false);
 
-            // Groups (small italic, bottom-left)
+            //Groups (small italic, bottom-left)
             String groups = String.join(", ", reforge.getAppliesToGroups());
             if (!groups.isEmpty()) {
                 graphics.drawString(font,
@@ -105,7 +104,7 @@ public class ReforgeSelectionList extends ObjectSelectionList<ReforgeSelectionLi
                         left + 4, top + 19, 0xFFFFFF, false);
             }
 
-            // Chance (bottom-right)
+            //Chance (bottom-right)
             String chanceText = buildChanceText();
             int chanceX = left + width - font.width(chanceText) - 4;
             int chanceY = top + 19;
@@ -113,7 +112,7 @@ public class ReforgeSelectionList extends ObjectSelectionList<ReforgeSelectionLi
                     Component.literal(chanceText).withStyle(Style.EMPTY.withColor(0x44AA44)),
                     chanceX, chanceY, 0xFFFFFF, false);
 
-            // Tooltip: show all group chances when hovering over the chance text
+            //Tooltip: show all group chances when hovering over the chance text
             if (mouseX >= chanceX && mouseX <= chanceX + font.width(chanceText)
                     && mouseY >= chanceY && mouseY <= chanceY + font.lineHeight) {
                 java.util.List<Component> tooltip = buildChanceTooltip();
@@ -163,16 +162,18 @@ public class ReforgeSelectionList extends ObjectSelectionList<ReforgeSelectionLi
             return lines;
         }
 
-        /**
-         * Returns true if the given reforge can appear on items of the given group.
-         * Accounts for ANY and the ARMOR family (ARMOR covers all sub-groups and vice versa).
-         */
+
+        /*****************************************************************************************************************************************************************
+        Task: Check if the reforge can appear on the group.
+
+        Special handling for ARMOR and ANY
+        *****************************************************************************************************************************************************************/
         private boolean appliesToGroup(Reforge r, String group) {
             List<String> g = r.getAppliesToGroups();
             if (g.contains("ANY")) return true;
             if (g.contains(group)) return true;
 
-            // ARMOR family: ARMOR covers all sub-groups
+
             java.util.Set<String> armorFamily = java.util.Set.of(
                 "ARMOR", "BOOTS", "HELMETS", "CHESTPLATES", "LEGGINGS"
             );
@@ -226,7 +227,6 @@ public class ReforgeSelectionList extends ObjectSelectionList<ReforgeSelectionLi
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             ReforgeSelectionList.this.setSelected(this);
-            // Open EditReforgeGUI on click
             Minecraft.getInstance().setScreen(new ReforgeEditorGUI(reforge));
             return true;
         }

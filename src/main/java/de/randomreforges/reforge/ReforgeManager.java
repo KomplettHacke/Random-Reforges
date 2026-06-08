@@ -33,7 +33,7 @@ public class ReforgeManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static boolean ignoreDefaultReforges = false;
     private static int     rerollCostLevels      = 5;
-    private static String  rerollCostItem        = "";  // e.g. "minecraft:diamond" or "#forge:gems"
+    private static String  rerollCostItem        = "";
     private static int     rerollCostItemAmount  = 0;
 
     public static void load() {
@@ -47,21 +47,19 @@ public class ReforgeManager {
             return;
         }
 
-        // Load settings first
+
         loadSettings(dir);
 
-        // Load default reforges.json directly from JAR unless ignored
         if (!ignoreDefaultReforges) {
             loadDefaultFromJar();
         } else {
             RandomReforges.LOGGER.info("[RandomReforges] Skipping reforges.json (Ignore Default Reforges is enabled)");
         }
 
-        // Load custom_reforges.json from filesystem
+        //Load custom_reforges.json (config/randomreforges/custom_reforges.json)
         loadCustomFromFile(dir.resolve("custom_reforges.json"));
     }
 
-    /** Reads reforges.json directly from the JAR – no config folder copy needed. */
     private static void loadDefaultFromJar() {
         try (InputStream in = RandomReforges.class.getResourceAsStream("/randomreforges/reforges.json")) {
             if (in == null) {
@@ -78,7 +76,6 @@ public class ReforgeManager {
         }
     }
 
-    /** Reads custom_reforges.json from the config folder. Creates it if missing. */
     private static void loadCustomFromFile(Path path) {
         if (!Files.exists(path)) {
             try (Writer w = Files.newBufferedWriter(path)) {
@@ -98,7 +95,7 @@ public class ReforgeManager {
             RandomReforges.LOGGER.error("Failed to load custom_reforges.json - skipping!", e);
         }
     }
-
+    //*** JSON Parser ******************************************************
     /** Parses a JsonObject of reforge entries into REFORGES. Returns count of loaded entries. */
     private static int parseReforges(JsonObject root, String sourceName) {
         int loaded = 0;
@@ -121,7 +118,7 @@ public class ReforgeManager {
                 if (obj.has("attributes")) {
                     for (JsonElement e : obj.getAsJsonArray("attributes")) {
                         JsonObject a = e.getAsJsonObject();
-                        // Optional scalable fields
+
                         ResourceLocation scaledBy = a.has("scaledBy")
                                 ? ResourceLocation.parse(a.get("scaledBy").getAsString()) : null;
                         double scaleRatio = a.has("scaleRatio")
@@ -150,7 +147,7 @@ public class ReforgeManager {
         return loaded;
     }
 
-    // ── Settings ──────────────────────────────────────────────────────────────
+    //*** Settings ******************************************************
 
     public static boolean isIgnoreDefaultReforges()              { return ignoreDefaultReforges; }
     public static void    setIgnoreDefaultReforges(boolean value) { ignoreDefaultReforges = value; }
@@ -162,7 +159,6 @@ public class ReforgeManager {
     public static int    getRerollCostItemAmount()          { return rerollCostItemAmount; }
     public static void   setRerollCostItemAmount(int v)     { rerollCostItemAmount = Math.max(0, v); }
 
-    /** Returns true if rerolling is free (levels=0 AND (item empty OR amount=0)). */
     public static boolean isRerollFree() {
         boolean noLevels = rerollCostLevels <= 0;
         boolean noItem   = rerollCostItem.isEmpty() || rerollCostItemAmount <= 0;
@@ -191,6 +187,7 @@ public class ReforgeManager {
         }
     }
 
+    //*** Function used by SettingsGUI to save everything to settings.json ******************************************************
     public static void saveSettings() {
         Path path = FMLPaths.CONFIGDIR.get().resolve("randomreforges").resolve("settings.json");
         JsonObject obj = new JsonObject();
@@ -205,7 +202,6 @@ public class ReforgeManager {
         }
     }
 
-    // ── CRUD ──────────────────────────────────────────────────────────────────
 
     public static boolean saveCustomReforge(String id, JsonObject reforgeObj) {
         Path path = FMLPaths.CONFIGDIR.get().resolve("randomreforges").resolve("custom_reforges.json");
@@ -257,8 +253,7 @@ public class ReforgeManager {
         }
     }
 
-    // ── Queries ───────────────────────────────────────────────────────────────
-
+    //*** Queries (especially needed to remove reforges ) ******************************************************
     public static Reforge getById(String id) { return REFORGES.get(id); }
     public static Collection<Reforge> getAll() { return REFORGES.values(); }
 

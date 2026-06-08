@@ -55,25 +55,24 @@ public class SettingsGUI extends Screen {
             itemRowData.add(new String[]{ item, String.valueOf(amount) });
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // init
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Initialization
+    *****************************************************************************************************************************************************************/
     @Override
     protected void init() {
         itemRows.clear();
 
         int cx = this.width / 2;
         int lx = cx - PANEL_W / 2;
-        int y  = 40;   // fixed – outer scroll via PoseStack
+        int y  = 40;
 
-        // ── Section 1: General ────────────────────────────────────────────────
+
         y += TEXT_HEIGHT + 2;
         ignoreDefaultReforgesBox = new Checkbox(lx, y, 20, 20,
                 Component.empty(), ReforgeManager.isIgnoreDefaultReforges());
         this.addRenderableWidget(ignoreDefaultReforgesBox);
         y += 22 + TEXT_HEIGHT + 16;
 
-        // ── Section 2: Reforge Reroll Costs ───────────────────────────────────
         y += TEXT_HEIGHT + 2;
 
         xpField = new EditBox(this.font, lx, y + 14, 50, FIELD_HEIGHT, Component.empty());
@@ -83,7 +82,6 @@ public class SettingsGUI extends Screen {
         this.addRenderableWidget(xpField);
         y += FIELD_HEIGHT + TEXT_HEIGHT + TEXT_HEIGHT + 14;
 
-        // "+ Add Item" button
         addItemButtonY = y;
         this.addRenderableWidget(Button.builder(Component.literal("+ Add Item"), btn -> {
                     syncItemRows();
@@ -94,7 +92,6 @@ public class SettingsGUI extends Screen {
                 .pos(lx - 1, addItemButtonY).size(80, 18).build());
         y += 26;
 
-        // ── Item scroll panel ─────────────────────────────────────────────────
         itemPanelLeft   = lx;
         itemPanelTop    = y;
         itemPanelBottom = y + ITEM_VISIBLE_ROWS * ITEM_ROW_STRIDE;
@@ -125,21 +122,20 @@ public class SettingsGUI extends Screen {
 
         y = itemPanelBottom + 16;
 
-        // ── Save / Cancel (fixed at bottom, outside scroll – see render()) ──────
+        //Buttons at the bottom
         int fixedBtnY = this.height - 28;
         saveButton   = Button.builder(Component.literal("Save"),   btn -> onSave())
                 .pos(cx - 52, fixedBtnY).size(50, 20).build();
         cancelButton = Button.builder(Component.literal("Cancel"), btn -> this.onClose())
                 .pos(cx + 2,  fixedBtnY).size(50, 20).build();
 
-        // Content height ends at the item panel – buttons are fixed and not scrolled.
-        // +100 px padding so the user can scroll comfortably past the last row.
+
         totalContentHeight = itemPanelBottom + 16 + 100;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Scroll helpers
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Scroll helpers
+    *****************************************************************************************************************************************************************/
     private int totalItemContentHeight() { return itemRowData.size() * ITEM_ROW_STRIDE; }
     private int visibleItemPanelHeight() { return itemPanelBottom - itemPanelTop; }
     private int maxItemScroll()          { return Math.max(0, totalItemContentHeight() - visibleItemPanelHeight()); }
@@ -182,9 +178,10 @@ public class SettingsGUI extends Screen {
         return super.mouseClicked(mouseX, adjustedY, button);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Sync / Save
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Sync
+    Save
+    *****************************************************************************************************************************************************************/
     private void syncItemRows() {
         itemRowData.clear();
         for (EditBox[] row : itemRows)
@@ -224,9 +221,9 @@ public class SettingsGUI extends Screen {
         screenScrollOffset = Math.max(0, Math.min(screenScrollOffset, maxScroll));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Render
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Render
+    *****************************************************************************************************************************************************************/
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(g);
@@ -236,15 +233,13 @@ public class SettingsGUI extends Screen {
         int rx = cx + PANEL_W / 2;
         int y  = 40;
 
-        // Title fixed (not scrolled)
+
         g.drawCenteredString(this.font, this.title, cx, 15, LABEL_COLOR);
 
-        // Outer scroll via pose
         g.pose().pushPose();
         g.pose().translate(0, -screenScrollOffset, 0);
         g.enableScissor(0, 20, this.width, this.height - 36);
 
-        // ── Section 1: General ────────────────────────────────────────────────
         sectionHeader(g, lx - 11, y, "▶ General");
         y += TEXT_HEIGHT + 6;
         y += 22;
@@ -266,7 +261,6 @@ public class SettingsGUI extends Screen {
         g.fill(lx, y, rx, y + 1, SEP_COLOR);
         y += 6;
 
-        // ── Section 2: Reforge Reroll Costs ───────────────────────────────────
         sectionHeader(g, lx - 11, y, "▶ Reforge Reroll Costs");
         y += TEXT_HEIGHT + 2;
 
@@ -287,7 +281,6 @@ public class SettingsGUI extends Screen {
                 lx + 86, addItemButtonY + 5, DESC_COLOR, false);
         y += 26;
 
-        // ── Item panel ────────────────────────────────────────────────────────
         drawPanelBorder(g);
 
         for (int i = 0; i < itemRows.size(); i++) {
@@ -299,7 +292,6 @@ public class SettingsGUI extends Screen {
 
         super.render(g, mouseX, mouseY, partialTick);
 
-        // Inner scissor in screen space
         if (itemPanelBottom > itemPanelTop)
             g.enableScissor(itemPanelLeft,
                     itemPanelTop    - screenScrollOffset,
@@ -323,15 +315,10 @@ public class SettingsGUI extends Screen {
 
         renderItemScrollbar(g);
 
-        // Close outer scroll transform
         g.disableScissor();
         g.pose().popPose();
 
-        // Outer scrollbar in screen space
         renderOuterScrollbar(g);
-        // Dark footer strip – prevents scrolled content from visually colliding with buttons
-        //g.fill(0, this.height - 36, this.width, this.height, 0xC0101010);
-        // Fixed buttons – always at the bottom of the screen, independent of scroll
         saveButton.render(g, mouseX, mouseY, partialTick);
         cancelButton.render(g, mouseX, mouseY, partialTick);
     }

@@ -16,14 +16,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 
-/**
- * Handles recalculation of scaled reforge attributes.
- *
- * Uses a dirty-flag pattern:
- *   1. LivingEquipmentChangeEvent marks the player as dirty.
- *   2. PlayerTickEvent (server side, every 5 ticks) flushes all dirty players
- *      in a single pass – collapsing multiple rapid equipment changes into one update.
- */
+
 /*****************************************************************************************************************************************************************
 Handles recalculation of scaled reforge attributes.
  

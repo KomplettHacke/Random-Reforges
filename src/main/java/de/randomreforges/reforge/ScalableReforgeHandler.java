@@ -24,17 +24,24 @@ import net.minecraftforge.fml.common.Mod;
  *   2. PlayerTickEvent (server side, every 5 ticks) flushes all dirty players
  *      in a single pass – collapsing multiple rapid equipment changes into one update.
  */
+/*****************************************************************************************************************************************************************
+Handles recalculation of scaled reforge attributes.
+ 
+Uses a dirty-flag pattern:
+1. LivingEquipmentChangeEvent marks the player as dirty.
+2. PlayerTickEvent (server side, every 5 ticks) flushes all dirty players
+   in a single pass – collapsing multiple rapid equipment changes into one update.
+*****************************************************************************************************************************************************************/
 @Mod.EventBusSubscriber(modid = RandomReforges.MODID)
 public class ScalableReforgeHandler {
 
     private static final int RECALC_INTERVAL = 5; // ticks between flush checks
     private static final String REFORGE_TAG  = "RandomReforges";
 
-    /** Players that need a recalculation on the next flush. */
+
     public static final Set<UUID> dirtyPlayers = new HashSet<>();
 
-    // ── Mark dirty ────────────────────────────────────────────────────────────
-
+    //*** Mark dirty ******************************************************
     @SubscribeEvent
     public static void onEquipmentChange(LivingEquipmentChangeEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
@@ -46,8 +53,8 @@ public class ScalableReforgeHandler {
         }
     }
 
-    // ── Flush dirty players ───────────────────────────────────────────────────
 
+    //*** Flush dirty players ******************************************************
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
@@ -62,12 +69,8 @@ public class ScalableReforgeHandler {
         recalculate(player);
     }
 
-    // ── Core recalculation ────────────────────────────────────────────────────
 
-    /**
-     * Recalculates all scaled reforge modifiers for the given player.
-     * Removes old modifiers and rewrites them with the current scaled values.
-     */
+    //*** Core recalculation ******************************************************
     public static void recalculate(Player player) {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);
@@ -79,19 +82,18 @@ public class ScalableReforgeHandler {
             ReforgeInstance inst = ReforgeInstance.fromNBT(tag.getCompound(REFORGE_TAG));
             if (inst == null) continue;
 
-            // Only process items that actually have scaled attributes
+            //Only change items with scaled reforges
             boolean hasScaled = inst.getReforge().getAttributes().stream()
                     .anyMatch(Reforge.AttributeEntry::isScaled);
             if (!hasScaled) continue;
 
-            // Remove and reapply with fresh scaled values
+
             AttributeUtil.removeAttributes(stack);
             AttributeUtil.applyAttributes(stack, inst, player);
         }
     }
 
-    // ── Helper ────────────────────────────────────────────────────────────────
-
+    //*** Helper ******************************************************
     private static boolean playerHasScaledReforge(Player player) {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);

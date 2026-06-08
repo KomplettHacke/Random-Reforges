@@ -97,11 +97,7 @@ public class ReforgeListGUI extends Screen {
         renderUpwardDropdown(graphics, mouseX, mouseY);
     }
 
-    /**
-     * Draws the search-mode dropdown list ABOVE the button instead of below.
-     * The DropdownWidget's own renderDropdown() draws downward, so we skip that
-     * and handle the upward direction ourselves here.
-     */
+
     private void renderUpwardDropdown(GuiGraphics graphics, int mouseX, int mouseY) {
         if (searchMode == null || !searchMode.isOpen()) return;
 
@@ -127,9 +123,9 @@ public class ReforgeListGUI extends Screen {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Input
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Input
+    *****************************************************************************************************************************************************************/
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (searchMode != null && searchMode.isOpen()) {
@@ -153,14 +149,12 @@ public class ReforgeListGUI extends Screen {
                 }
             }
 
-            // Click anywhere else → close
             searchMode.close();
             return super.mouseClicked(mouseX, mouseY, button);
         }
 
         boolean result = super.mouseClicked(mouseX, mouseY, button);
-        // If the mode button was just toggled open/closed, no filter change needed.
-        // But if the mode button click closed and changed something, re-apply.
+
         applyFilter();
         return result;
     }

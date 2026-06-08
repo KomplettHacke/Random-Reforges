@@ -14,6 +14,19 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
 
+
+/*****************************************************************************************************************************************************************
+Was the main way to reroll reforges at the beginning as I wasnt sure how to reroll them in survival.
+
+TODO: Rework the whole command
+
+Command structure:
+1. /reforge <player> apply <reforge-ID>            Applies the reforge
+2. /reforge <player> clear                         Clears the reforge and makes an item unreforgable
+
+Check out applyAttributes and removeAttributes in AttributeUtil.java for core logic
+*****************************************************************************************************************************************************************/
+
 public class ReforgeCommand {
 
     private static final String REFORGE_TAG = "RandomReforges";
@@ -88,7 +101,6 @@ public class ReforgeCommand {
 
         AttributeUtil.removeAttributes(stack);
 
-        //curio items get their attributes via CurioAttributeModifierEvent, not via NBT
         boolean isCurio = ModList.get().isLoaded("curios")
                 && de.randomreforges.curios.CuriosUtil.isCurioItem(stack);
 

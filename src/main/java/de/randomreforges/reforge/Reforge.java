@@ -186,12 +186,16 @@ public class Reforge {
             default -> false;
         };
     }
-
+    /*****************************************************************************************************************************************************************
+    Attribute entries
+    Task: Reading out the attributes from reforges.json and custom_reforges.json
+    - split into static attributes and scaling attributes
+    *****************************************************************************************************************************************************************/
     public static class AttributeEntry {
         private final ResourceLocation attributeId;
         private final double amount;
         private final String operation;
-        // Scalable reforge fields – both null/0 means static amount
+        //both scaled reforge fields = null or 0 -> static attribute
         private final ResourceLocation scaledBy;
         private final double           scaleRatio;
         private Attribute resolved;
@@ -217,7 +221,7 @@ public class Reforge {
             return resolved;
         }
 
-        /** Returns the attribute used as scaling source, or null if not scalable. */
+        //returns scaling source or null if not scaled
         public Attribute getScaleSourceAttribute() {
             if (scaledBy == null) return null;
             if (resolvedScaleSource == null)
@@ -227,19 +231,13 @@ public class Reforge {
 
         public boolean isScaled() { return scaledBy != null && scaleRatio != 0; }
 
-        /**
-         * Computes the effective amount.
-         * Scaled: amount + (entity base value of scaledBy * scaleRatio)
-         * Static: just amount
-         */
+
         public double computeAmount(net.minecraft.world.entity.LivingEntity entity) {
             if (!isScaled() || entity == null) return amount;
             Attribute src = getScaleSourceAttribute();
             if (src == null) return amount;
             var inst = entity.getAttribute(src);
             if (inst == null) return amount;
-            // Use getValue() (includes all modifiers) – getBaseValue() is always 0
-            // for stats like armor that come entirely from equipment.
             return amount + inst.getValue() * scaleRatio;
         }
 

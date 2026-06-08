@@ -39,22 +39,23 @@ public class Events {
 
         applyInitialReforge(newStack, slot, isCurio, player);
 
-        // Mark player dirty so scaled reforges get recalculated
+        //Mark player dirty so scaled reforges get recalculated
         ScalableReforgeHandler.dirtyPlayers.add(player.getUUID());
     }
 
-    /**
-     * Applies a random reforge to an item that doesn't have one yet.
-     * If the item already has a reforge, refreshes its NBT attributes in case
-     * the reforge definition was edited (e.g. via the GUI).
-     * Called both from LivingEquipmentChangeEvent (vanilla) and CurioChangeEvent (curios).
-     *
-     * @param stack   the item to reforge
-     * @param slot    the equipment slot (use MAINHAND for curio items)
-     * @param isCurio true if the item is a curio – skips NBT attribute application
-     *                since CurioAttributeModifierEvent handles that instead
-     * @param entity  the entity equipping the item (used for scaled reforge computation)
-     */
+
+    /*****************************************************************************************************************************************************************
+     Applies a random reforge to an item that doesn't have one yet.
+     - if already reforged, refresh NBT attributes in case if reforge was edited (via GUI)
+     - needed for LivingEquipmentChangeEvent (vanilla) and CurioChangeEvent (CuriosAPI)
+     - Parameters:
+        @param stack       the item to reforge
+        @param slot        the equipment slot (use MAINHAND for curio items)
+        @param isCurio     true if the item is a curio – skips NBT attribute application
+                           since CurioAttributeModifierEvent handles that instead
+        @param entity      the entity equipping the item (used for scaled reforge computation)
+    *****************************************************************************************************************************************************************/
+
     public static void applyInitialReforge(ItemStack stack, EquipmentSlot slot, boolean isCurio,
                                            net.minecraft.world.entity.LivingEntity entity) {
         if (stack.isEmpty()) return;
@@ -142,15 +143,15 @@ public class Events {
             String sign = isPositive ? "+" : (isZero ? "" : "-");
             int color = isPositive ? 0x3F76E4 : 0xFF5555;
 
+            //*** Scaled Reforge (2 lines) ******************************************************
             if (entry.isScaled()) {
-                // Scaled reforge: two separate lines
                 Attribute srcAttr = entry.getScaleSourceAttribute();
 
                 String srcName = srcAttr != null
                         ? Component.translatable(srcAttr.getDescriptionId()).getString()
                         : entry.getScaledBy().toString();
 
-                // Line 1: base amount (only if non-zero)
+                //line 1
                 if (Math.abs(amt) >= 1e-9) {
                     String baseText = sign + formatNumber(Math.abs(amt));
 
@@ -161,8 +162,8 @@ public class Events {
                     );
                 }
 
-                // Line 2: "+1 [Attribute] per [1/ratio] [ScaledBy]"
-                // Inverting the ratio avoids tiny decimals (e.g. 0.001 → "per 1000 Max Mana").
+                //line 2: "+1 <Attribute ID> per 1/<Scale Ratio> <ScaledBy>"
+                //inverted the the ratio to prevent small decimals which got rounded to 0 (looked like "+0 Spell Power per Max Mana")
                 double ratio = entry.getScaleRatio();
                 if (Math.abs(ratio) >= 1e-9) {
                     boolean ratioPositive = ratio > 0;
@@ -216,6 +217,18 @@ public class Events {
         }
     }
 
+    /*****************************************************************************************************************************************************************
+    Soulless Reforge Core -> Reforge Core interaction
+    Goal/Task: Consume villager to convert the Soulless Reforge Core into a Reforge Core
+
+    1. Player rightclicks villager
+    2. Holding core?
+    3. Run this only serverside
+    4. Delete core
+    5. Give Reforge Core
+    6. Remove the villager (TO-DO: Replace it with custom mob "Soulless Villager")
+    7. Cancel interaction to prevent opening the GUI
+    *****************************************************************************************************************************************************************/
     @SubscribeEvent
     public static void onVillagerRightClick(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
 
@@ -227,37 +240,33 @@ public class Events {
         Level level = player.level();
         ItemStack stack = player.getItemInHand(event.getHand());
 
-        //holding core
+
         if (!stack.is(de.randomreforges.registry.ItemRegistry.SOULLESS_REFORGE_CORE.get())) {
             return;
         }
-
-        //server only
+        
         if (level.isClientSide) {
             return;
         }
 
-        //consume core
         if (!player.isCreative()) {
             stack.shrink(1);
         }
 
-        //replace with reforge core
         player.addItem(new ItemStack(de.randomreforges.registry.ItemRegistry.REFORGE_CORE.get()));
 
-        //sound effect
         level.playSound(null, villager.blockPosition(),
                 net.minecraft.sounds.SoundEvents.SOUL_ESCAPE,
                 net.minecraft.sounds.SoundSource.PLAYERS,
                 3.0f, 1.0f);
-
-        //remove villager
+        
         villager.discard();
 
-        //dont open gui
         event.setCancellationResult(InteractionResult.SUCCESS);
         event.setCanceled(true);
     }
+
+    //*** Small hints as ingame guide how to use these items ******************************************************
     @SubscribeEvent
     public static void onModItemTooltip(ItemTooltipEvent event) {
         Item item = event.getItemStack().getItem();

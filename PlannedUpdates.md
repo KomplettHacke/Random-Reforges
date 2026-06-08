@@ -1,4 +1,4 @@
-_Please note that this mainly for me, so most of the planned stuff will be in German. I dont want to put effort into translating it just to not add it._
+_Please note that this mainly for me, so most of the planned stuff will be in German. I dont want to put effort into translating it just to not add it. But stuff which is translated to English will be added unless I get too much negative feedback - So, lemme know what you think :)_
 # Released Updates
 ## Version 2.0
 - Reforge Cage experience system change (use xp levels instead of xp)

@@ -32,7 +32,7 @@ public class ReforgeListGUI extends Screen {
         );
         this.addRenderableWidget(list);
 
-        // ── Top-right buttons ─────────────────────────────────────────────────
+        //*** Top-right buttons ******************************************************
         this.addRenderableWidget(Button.builder(Component.literal("+"),
                         btn -> this.minecraft.setScreen(new ReforgeEditorGUI()))
                 .pos(this.width - 28, 6).size(20, 20).build());
@@ -45,10 +45,10 @@ public class ReforgeListGUI extends Screen {
                         btn -> this.minecraft.setScreen(new HelpGUI()))
                 .pos(this.width - 76, 6).size(20, 20).build());
 
-        // ── Top-left: Discord button ──────────────────────────────────────────
+        //*** Top-left button: Discord ******************************************************
         this.addRenderableWidget(new DiscordButton(8, 6));
 
-        // ── Search bar (bottom center) ────────────────────────────────────────
+        //*** Search bar ******************************************************
         int barY       = this.height - BOTTOM_GAP + 9;
         int dropWidth  = 110;
         int fieldWidth = 180;
@@ -66,7 +66,6 @@ public class ReforgeListGUI extends Screen {
         this.addRenderableWidget(searchMode);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
 
     private void applyFilter() {
         if (list != null && searchField != null && searchMode != null) {
@@ -75,9 +74,10 @@ public class ReforgeListGUI extends Screen {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Render
-    // ─────────────────────────────────────────────────────────────────────────
+    /*****************************************************************************************************************************************************************
+    Render
+    *****************************************************************************************************************************************************************/
+
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
@@ -93,7 +93,6 @@ public class ReforgeListGUI extends Screen {
                     this.width / 2, this.height / 2, 0x777777);
         }
 
-        // Dropdown opens UPWARD – draw it after everything else so it appears on top
         renderUpwardDropdown(graphics, mouseX, mouseY);
     }
 
@@ -104,11 +103,10 @@ public class ReforgeListGUI extends Screen {
         int optH    = 14;
         int x       = searchMode.getX();
         int w       = searchMode.getWidth();
-        int baseY   = searchMode.getY();     // top edge of the button
+        int baseY   = searchMode.getY();
         int totalH  = SEARCH_MODES.size() * optH;
-        int listTop = baseY - totalH;        // list opens ABOVE the button
-
-        // Border + background
+        int listTop = baseY - totalH;
+        
         graphics.fill(x - 1,  listTop - 1, x + w + 1, baseY + 1, 0xFF888888);
         graphics.fill(x,      listTop,     x + w,     baseY,     0xFF2A2A2A);
 

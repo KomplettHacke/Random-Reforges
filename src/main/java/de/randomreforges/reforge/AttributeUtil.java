@@ -14,9 +14,17 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 
-public class AttributeUtil {
 
-    //remove only reforge stats
+public class AttributeUtil {
+    /*****************************************************************************************************************************************************************
+    Utilities often used in the mod:
+    1. removeAttributes (CuriosAPI and normal items)
+    2. applyAttributes (normal items only)
+    2.1 Requires "stack", "instance"
+    2.2 Requires "stack", "instance", "entity"    -> If specific entity is needed
+    3. detectSlot                                 -> Needed to define the groups in SettingsGUI and to apply the attributes
+    *****************************************************************************************************************************************************************/
+
     public static void removeAttributes(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTag();
 
@@ -40,7 +48,7 @@ public class AttributeUtil {
         stack.setTag(tag);
     }
 
-    //nbt appliance - only called for non-curio items
+
     public static void applyAttributes(ItemStack stack, ReforgeInstance instance) {
 
         Reforge reforge = instance.getReforge();
@@ -48,7 +56,7 @@ public class AttributeUtil {
 
         CompoundTag tag = stack.getOrCreateTag();
 
-        //copy vanilla modifiers if not present
+        //Save vanilla attributes (otherwise they would just be gone and it would replace them with the reforge attributes)
         if (!tag.contains("AttributeModifiers")) {
 
             var defaults = stack.getItem().getDefaultAttributeModifiers(slot);
@@ -69,14 +77,12 @@ public class AttributeUtil {
             stack.setTag(tag);
         }
 
-        //add reforge modifiers
         ListTag list = tag.getList("AttributeModifiers", Tag.TAG_COMPOUND);
 
         for (Reforge.AttributeEntry entry : reforge.getAttributes()) {
 
             Attribute attribute = entry.getAttribute();
 
-            //skip invalid attribute
             if (attribute == null) {
                 RandomReforges.LOGGER.warn(
                         "[RandomReforges] Attribute '{}' not found. Skipping.",
@@ -112,10 +118,13 @@ public class AttributeUtil {
         stack.setTag(tag);
     }
 
-    /**
-     * Applies reforge attributes to item NBT, computing scaled amounts from the given entity.
-     * Call this instead of applyAttributes(stack, instance) when a player/entity is available.
-     */
+
+    /*****************************************************************************************************************************************************************
+    Applies reforge attributes to item NBT, computing scaled amounts from the given entity.
+
+    Call this instead of applyAttributes(stack, instance) when a player/entity is available!
+    *****************************************************************************************************************************************************************/
+
     public static void applyAttributes(ItemStack stack, ReforgeInstance instance,
                                        net.minecraft.world.entity.LivingEntity entity) {
         Reforge reforge = instance.getReforge();
@@ -155,7 +164,6 @@ public class AttributeUtil {
                     .getBytes(java.nio.charset.StandardCharsets.UTF_8)
             );
 
-            // Use computeAmount to get the scaled value if applicable
             double amount = entry.computeAmount(entity);
 
             AttributeModifier modifier = new AttributeModifier(uuid, "Reforge_" + reforge.getId(),
@@ -175,7 +183,7 @@ public class AttributeUtil {
         stack.setTag(tag);
     }
 
-    //detect correct slot
+
 
     public static EquipmentSlot detectSlot(ItemStack stack) {
 

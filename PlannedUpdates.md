@@ -31,7 +31,9 @@ _Please note that this mainly for me, so most of the planned stuff will be in Ge
 ## Version 3.1
 - Add "Perfect" reforge mechanic
   - configurable in SettingsGUI
-- Make all scrollbars the same (There was no feedback, so Imma choose one)
+- Make all scrollbars the same (There was no feedback, so Imma choose one) -> Merge them into in file?
+- Fix HelpGUI title
+- Fix small differences between HelpGUI and ReforgeEditorGUI
 
 ## Version 3.2
 - Add Reforge Blacklist

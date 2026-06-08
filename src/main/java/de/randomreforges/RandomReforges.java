@@ -66,30 +66,3 @@ public class RandomReforges {
         }
     }
 }
-
-
-
-
-/* TO DO
-- Reforge Cage Block fixen                                                  - Erledigt (2.0)
-- Reforge GUI: Suchleiste                                                   - Erledigt (2.0)
-- Add Attribute-Button Scroll-Dings hinzufügen                              - Erledigt (2.0)
-- Random UUID entfernen -> Stabilität                                       - Erledigt (2.0)
-- Logik-Duplikate in Events.java und CurioEquipEvents.java entfernen        - Erledigt (2.0)
-- Shield Reforges                                                           - Erledigt (2.0)
-- Item Descriptions                                                         - Erledigt 2.1.1
-- Fehlermeldung beim Reforge Cage Block: "You have less than <required levels> levels", "You have less than <required item amount> of <item>"   - 2.1.1
-- Scaling Reforges (x <Attribute> pro y <Attribute>) hinzufügen             - Erledigt (3.0)
-    - Scrollcontainer in Editor GUI fixen                                   - 3.0
-- Item Attribute neu berechnen bei Reforgeänderung                          - Erledigt (3.0)
-    - funktioniert im Spielerinventar                                       - Erledigt (3.0)
-    - funktioniert in Kisten                                                - nicht machbar, Ersatz hinzugefügt (3.0)
-- GUI-Scale Fix                                                             - Erledigt (3.0)
-- HelpGUI Formattierungen fixen                                             - Erledigt (3.0)
-- Advancement "Gonna catch 'em all" (Soulless Core gecraftet)               - Kleines Update 3.1
-- Advancement "Another 'ethical' villager prison..."(Reforge Cage erzeugt)  - Kleines Update 3.1
-- "Perfect"-Reforge (configurable, SettingsGUI)                             - Kleines Update 3.2
-- Reforge Blacklist                                                         - Kleines Update 3.3
-- Vollständige Servercompat                                                 - Großes Update 4.0
-
-*/

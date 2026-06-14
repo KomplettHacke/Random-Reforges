@@ -34,10 +34,12 @@ _Please note that this mainly for me, so most of the planned stuff will be in Ge
 - Make all scrollbars the same (There was no feedback, so Imma choose one) -> Merge them into in file?
 - Fix HelpGUI title
 - Fix small differences between HelpGUI and ReforgeEditorGUI
+- Remove "armor_perfect" reforge
 
 ## Version 3.2
 - Add Reforge Blacklist
   - Should I remove the "Ignore Default Reforges" button?
+- Button to delete single attributes from reforges -> QoL
 
 ## Version 3.3
 - Hardmode

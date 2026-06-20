@@ -39,9 +39,9 @@ _Please note that this mainly for me, so most of the planned stuff will be in Ge
   - Should I remove the "Ignore Default Reforges" button?
 - Button to delete single attributes from reforges -> QoL
 - Command rework:
-  - /reforge <player> apply <reforge-id> [slot, optional]
-  - /reforge <player> clear [slot, optional]
-  - /reforge <player> lock [slot, optional]
+  - /reforge \<player> apply \<reforge-id> [slot, optional]
+  - /reforge \<player> clear [slot, optional]
+  - /reforge \<player> lock [slot, optional]
 - Bug fixes:
   - Curio reforging not working correctly
   - infinite loops leading to crashs

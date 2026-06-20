@@ -26,8 +26,6 @@ _Please note that this mainly for me, so most of the planned stuff will be in Ge
 - Advancement "Gonna catch 'em all" (Obtain Soulless Reforge Core) added
 - Advancement "Another 'ethical' villager prison..." (Create a Reforge Cage) added
 
-# Planned Updates
-
 ## Version 3.1
 - Add "Perfect" reforge mechanic
   - configurable in SettingsGUI
@@ -40,6 +38,20 @@ _Please note that this mainly for me, so most of the planned stuff will be in Ge
 - Add Reforge Blacklist
   - Should I remove the "Ignore Default Reforges" button?
 - Button to delete single attributes from reforges -> QoL
+- Command rework:
+  - /reforge <player> apply <reforge-id> [slot, optional]
+  - /reforge <player> clear [slot, optional]
+  - /reforge <player> lock [slot, optional]
+- Bug fixes:
+  - Curio reforging not working correctly
+  - infinite loops leading to crashs
+  - Scaling reforges not working on Curios
+  - Recalculating scaling reforges on ALL players on equip change -> Could have led to lags
+  - Comment line too short for default reforges -> max length doubled to 256 signs.
+  - Events triggering client- and serverside 
+  - "ANY" selection in the reforge editor ignored the blacklisted items in the textfield
+  
+# Planned Updates
 
 ## Version 3.3
 - Hardmode

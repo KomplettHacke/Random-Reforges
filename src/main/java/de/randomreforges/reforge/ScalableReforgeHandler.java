@@ -15,11 +15,12 @@ import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.ModList;
 
 
 /*****************************************************************************************************************************************************************
 Handles recalculation of scaled reforge attributes.
- 
+
 Uses a dirty-flag pattern:
 1. LivingEquipmentChangeEvent marks the player as dirty.
 2. PlayerTickEvent (server side, every 5 ticks) flushes all dirty players
@@ -69,6 +70,11 @@ public class ScalableReforgeHandler {
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
 
+            // Skip Curio items – their attributes are managed via CurioAttributeModifierEvent,
+            // not NBT. Applying NBT attributes here would cause stats to apply in any slot.
+            if (ModList.get().isLoaded("curios")
+                    && de.randomreforges.curios.CuriosUtil.isCurioItem(stack)) continue;
+
             CompoundTag tag = stack.getTag();
             if (tag == null || !tag.contains(REFORGE_TAG)) continue;
 
@@ -80,14 +86,18 @@ public class ScalableReforgeHandler {
                     .anyMatch(Reforge.AttributeEntry::isScaled);
             if (!hasScaled) continue;
 
-
             AttributeUtil.removeAttributes(stack);
             AttributeUtil.applyAttributes(stack, inst, player);
+        }
+
+        // Curios items use event-driven attributes – update their modifiers directly
+        if (ModList.get().isLoaded("curios")) {
+            ScalableReforgeHandlerCuriosHelper.recalculate(player);
         }
     }
 
     //*** Helper ******************************************************
-    private static boolean playerHasScaledReforge(Player player) {
+    public static boolean playerHasScaledReforge(Player player) {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
@@ -101,6 +111,11 @@ public class ScalableReforgeHandler {
             if (inst.getReforge().getAttributes().stream().anyMatch(Reforge.AttributeEntry::isScaled))
                 return true;
         }
+
+        if (ModList.get().isLoaded("curios")) {
+            return ScalableReforgeHandlerCuriosHelper.hasScaledReforge(player);
+        }
+
         return false;
     }
 }

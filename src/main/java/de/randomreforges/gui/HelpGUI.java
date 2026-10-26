@@ -1,5 +1,6 @@
 package de.randomreforges.gui;
 
+import de.randomreforges.gui.GUIConstructor;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
 public class HelpGUI extends Screen {
+
     /*****************************************************************************************************************************************************************
     - Can be accessed via a button in the top right corner in the main page of the GUI (check ReforgeListGUI)
     - explains the mechanics of the mod
@@ -18,6 +20,7 @@ public class HelpGUI extends Screen {
         Middle: actual content (scrollable)
         Footer: for all the buttons
     *****************************************************************************************************************************************************************/
+
     private static final int TEXT_COLOR   = 0xFFFFFF;
     private static final int HEADER_COLOR = 0xFFDD00;
     private static final int MUTED_COLOR  = 0xAAAAAA;
@@ -26,12 +29,11 @@ public class HelpGUI extends Screen {
     private static final int LINE_HEIGHT  = 11;
     private static final int SCROLL_SPEED = LINE_HEIGHT * 3;
 
-
     private int scrollOffset = 0;
     private int contentHeight = 0;
 
     public HelpGUI() {
-        super(Component.literal("Help"));        //TODO: Titel verschwindet immer wieder. In 3.0.2 beheben. Nochmal alle GUIs genau überprüfen
+        super(Component.literal("Help"));
     }
 
     @Override
@@ -43,7 +45,7 @@ public class HelpGUI extends Screen {
                 .size(80, 20)
                 .build());
     }
-
+    
     /*****************************************************************************************************************************************************************
     Render
     *****************************************************************************************************************************************************************/
@@ -52,8 +54,11 @@ public class HelpGUI extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
 
-        //Scrollable content - TODO: Fix the var names and the pixels (check ReforgeListGUI)
-        int contentTop    = 14;
+        //Fixed title – outside the scrollable area, like ReforgeListGUI
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 10, TEXT_COLOR);
+
+        //Scrollable content
+        int contentTop    = 30;
         int contentBottom = this.height - 36;
 
         //only work in the scrollable area
@@ -62,17 +67,11 @@ public class HelpGUI extends Screen {
         int x = PADDING;
         int y = contentTop - scrollOffset;  // shift everything up by scrollOffset
 
-        //*** Title ******************************************************
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, y, TEXT_COLOR);
-        y += LINE_HEIGHT + 6;
-
         //*** Reforge ID ******************************************************
         y = section(graphics, x, y, "Reforge ID",
             "An unique internal identifier for the reforge.",
             "Only lowercase letters, numbers and underscores are allowed.",
-            "Example:  armor_corrupted,  weapon_heavy",
-            null,
-            "Used by the /reforge apply <id> command to force-apply a specific reforge."
+            "Example:  armor_corrupted,  weapon_heavy"
         );
 
         //*** Display Name ******************************************************
@@ -144,54 +143,91 @@ public class HelpGUI extends Screen {
             "Stat modifiers granted by the reforge when the item is equipped.",
             "Each attribute entry has three fields:",
             null,
-            "  Attribute ID ||The registry name of the attribute",
-            "  ||minecraft:generic.attack_damage",
-            "  ||irons_spellbooks:max_mana",
+            "  Attribute ID     ||The registry name of the attribute",
+            "                   ||minecraft:generic.attack_damage",
+            "                   ||irons_spellbooks:max_mana",
             null,
-            "  ||The attribute probably does not exist if it has",
-            "  ||not been translated correctly in the tooltip.",
+            "                   ||The attribute probably does not exist if it has",
+            "                   ||not been translated correctly in the tooltip.",
             null,
-            "  Value ||The numeric modifier amount (can be negative)",
+            "  Value            ||The numeric modifier amount (can be negative)",
             null,
-            "  Operator ||How the value is applied:",
-            "    ADD ||Adds a flat value to the base stat.",
-            "    MULTIPLY_BASE ||Multiplies the base stat (before other bonuses).",
+            "  Operator         ||How the value is applied:",
+            "    ADD            ||Adds a flat value to the base stat.",
+            "    MULTIPLY_BASE  ||Multiplies the base stat (before other bonuses).",
             "    MULTIPLY_TOTAL ||Multiplies the final stat (after all bonuses).",
             "    SCALED ||Adds a flat value (optional) and",
-            "  ||gives a bonus depending on another attribute."
+            "  ||gives a bonus depending on another attribute.",
+            null,
+            "  Perfect reforged ||Whenever you reforge something, there will be",
+            "                   ||a low chance to get a perfect reforge. They",
+            "                   ||have no debuffs and their buffs are stronger."
         );
+
+        //*** /reforge ******************************************************
+        y = section(graphics, x, y, "/reforge Command",
+            "This command is used to modify the reforges on any item. This happens",
+            "regardless of any \"appliesTo\" groups or rules.",
+            null,
+            "Command structure:",
+            "  /reforge <player>||Always starts with that.",
+            "    apply <ID> [Slot*]||Applies the reforge on the selected",
+            "||item.",
+            "    clear <reforge> [Slot*]||Removes the reforge on the selected",
+            "||item.",
+            "    lock [Slot*]||Makes the reforge unchangeable (except commands)",
+            "Modded slots (from CuriosAPI) will get detected and added as possible slots",
+            "automatically.",
+            "*Optional, default: held item."
+        );
+
+        //*** Hardmode ******************************************************
+        y = section(graphics, x, y, "Hardmode",
+            "Hardmode is an optional difficulty mode enabled in the settings.",
+            "It affects reforging in two ways:",
+            null,
+            "  Lock Chance      ||After reforging at the cage, there is a",
+            "  ||configurable % chance the item gets permanently",
+            "  ||locked. It can no longer be reforged at the cage.",
+            "  ||Use /reforge apply to override the lock.",
+            null,
+            "  Debuff Variance  ||Debuff (negative) attributes are randomly",
+            "  ||scaled by a multiplier each time a reforge is",
+            "  ||applied. The multiplier is:",
+            "  ||  1 + random(Min%, Max%) / 100",
+            "  ||Example: Min = -50, Max = 50 means debuffs",
+            "  ||can be anywhere from 50% to 150% of normal.",
+            "  ||Negative Min values can reduce or even negate",
+            "  ||debuffs entirely.",
+            null,
+            "  Perfect + Hardmode  ||In hardmode, perfect reforges no longer",
+            "  ||remove debuffs. All attributes are applied,",
+            "  ||including debuffs (with variance applied).",
+            "  ||Positive attributes still get the bonus."
+        );
+
 
         //total content height (y is now past the last line, before offset)
         contentHeight = (y + scrollOffset) - contentTop;
 
-        graphics.disableScissor();
+        int visibleHeight = contentBottom - contentTop;
 
-        renderScrollbar(graphics, contentTop, contentBottom);
+        // Only render scrollbar when content actually overflows – avoids division by zero
+        // when contentHeight == visibleHeight and prevents rendering a useless bar.
+        if (contentHeight > visibleHeight) {
+            int thumbH = Math.max(32, visibleHeight * visibleHeight / contentHeight);
+            int thumbY = contentTop + (int)((long) scrollOffset * (visibleHeight - thumbH) / (contentHeight - visibleHeight));
+            GUIConstructor.renderScrollbar(graphics, this.width - 8, contentTop, contentBottom, thumbY, thumbH);
+        }
+
+        graphics.disableScissor();
 
         //render close button in fixed area
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
-    /*****************************************************************************************************************************************************************
-    Used in every GUI
-    TODO: own file -> no more logic duplicates    (Jede Scrollbar sieht unterschiedlich aus... DRINGEND BEHEBEN! 3.0.2!)
-    *****************************************************************************************************************************************************************/
-    
-    private void renderScrollbar(GuiGraphics graphics, int top, int bottom) {
-        int visibleHeight = bottom - top;
-        if (contentHeight <= visibleHeight) return; // no scrollbar needed
 
-        int barX         = this.width - 6;
-        int trackHeight  = visibleHeight;
-        int thumbHeight  = Math.max(20, trackHeight * visibleHeight / contentHeight);
-        int maxScroll    = contentHeight - visibleHeight;
-        int thumbY       = top + (scrollOffset * (trackHeight - thumbHeight)) / maxScroll;
 
-        //scroll track
-        graphics.fill(barX, top, barX + 4, bottom, 0x44FFFFFF);
-        //scroll thumb
-        graphics.fill(barX, thumbY, barX + 4, thumbY + thumbHeight, 0xAAFFFFFF);
-    }
 
     //Scroll function
     @Override
@@ -218,16 +254,25 @@ public class HelpGUI extends Screen {
         scrollOffset = Math.max(0, Math.min(scrollOffset + amount, maxScroll()));
     }
 
-    private int maxScroll() {
-        int visibleHeight = this.height - 36 - 14;
-        return Math.max(0, contentHeight - visibleHeight);
-    }
-
     /*****************************************************************************************************************************************************************
     Used to render all the articles in the help menu
     - "||" splits a line into a fixed part (left side) and th right columns.
         - right columns are moved in by 150px (custom tabstop)
     *****************************************************************************************************************************************************************/
+
+    private int maxScroll() {
+        int visibleHeight = this.height - 36 - 30;
+        return Math.max(0, contentHeight - visibleHeight);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Section helper
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Renders a labelled section with indented lines.
+     * Pass null as a line to insert a blank line.
+     */
     private int section(GuiGraphics g, int x, int startY,
                         String header, String... lines) {
         int y = startY;
@@ -244,7 +289,6 @@ public class HelpGUI extends Screen {
                 y += LINE_HEIGHT / 2;
                 continue;
             }
-
             if (line.contains("||")) {
                 String[] parts = line.split("\\|\\|", 2);
                 g.drawString(this.font,
@@ -263,7 +307,8 @@ public class HelpGUI extends Screen {
                     x + 6, y, color, false);
             y += LINE_HEIGHT;
         }
-        //Small gap after each section
+
+        //small gap after each section
         y += 6;
         return y;
     }

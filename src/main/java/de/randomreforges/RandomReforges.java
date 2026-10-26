@@ -6,6 +6,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 
 import de.randomreforges.curios.CuriosLoader;
+import de.randomreforges.network.NetworkHandler;
 import de.randomreforges.reforge.ReforgeCommand;
 import de.randomreforges.reforge.ReforgeManager;
 import de.randomreforges.registry.BlockEntityRegistry;
@@ -36,6 +37,8 @@ public class RandomReforges {
         BlockRegistry.BLOCK_ITEMS.register(modBus);
         CreativeTabRegistry.TABS.register(modBus);
         BlockEntityRegistry.BLOCK_ENTITIES.register(modBus);
+
+        NetworkHandler.register();
 
         MinecraftForge.EVENT_BUS.register(this);
 

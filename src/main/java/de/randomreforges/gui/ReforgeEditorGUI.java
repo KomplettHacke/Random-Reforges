@@ -37,6 +37,7 @@ Optional inputs:
                                         Leave empty for plain text without effect (maybe nice
                                         for adventure maps)
 *****************************************************************************************************************************************************************/
+
 public class ReforgeEditorGUI extends Screen {
 
     /*****************************************************************************************************************************************************************
@@ -62,7 +63,6 @@ public class ReforgeEditorGUI extends Screen {
     //*** Applies To (appliesTo, text input) ******************************************************
     private EditBox customAppliesToField;
 
-
     /*****************************************************************************************************************************************************************
     Single source of truth for checkbox state.
     Populated from editing reforge in constructor, updated before every rebuild.
@@ -70,15 +70,16 @@ public class ReforgeEditorGUI extends Screen {
     *****************************************************************************************************************************************************************/
     private final Map<String, Boolean> savedCbState = new LinkedHashMap<>();
 
-    //*** Applies To (appliesTo, text input) ******************************************************
+    //*** Attribute rows ******************************************************
     private static final List<String> OPERATORS = List.of("ADD", "MULTIPLY_BASE", "MULTIPLY_TOTAL", "SCALED");
 
     private record AttrRowData(String attrId, String value, String operator,
                                String scaledBy, String scaleRatio) {
-        //empty base row
+
         AttrRowData() { this("", "", "ADD", "", ""); }
-        //non-scaled
-        AttrRowData(String id, String val, String op) { this(id, val, op, "", "");
+
+        AttrRowData(String id, String val, String op) { this(id, val, op, "", ""); }
+
         boolean isScaled() { return "SCALED".equals(operator); }
     }
 
@@ -116,13 +117,17 @@ public class ReforgeEditorGUI extends Screen {
     //*** Misc ******************************************************
     private String  errorMessage          = "";
     private boolean needsRebuild          = false;  // dirty flag for safe deferred rebuild
+    private boolean pendingDelete         = false;  // two-click delete confirmation
     //*** Custom "Applies To" string ******************************************************
     private String initialCustomAppliesTo = "";
 
-    private static final int LABEL_COLOR  = 0xAAAAAA;
-    private static final int ERROR_COLOR  = 0xFF5555;
-    private static final int FIELD_WIDTH  = 150;
-    private static final int FIELD_HEIGHT = 20;
+    private static final int LABEL_COLOR       = 0xAAAAAA;
+    private static final int ERROR_COLOR       = 0xFF5555;
+    private static final int FIELD_WIDTH       = 150;
+    private static final int FIELD_HEIGHT      = 20;
+    //*** Delete button per attribute row ******************************************************
+    private static final int DEL_BTN_OFFSET_X  = 4 + FIELD_WIDTH + 70 + 130 + 4; // X offset from panel left (right of dropdown)
+    private static final int DEL_BTN_W         = 18;
 
     /*****************************************************************************************************************************************************************
     Constructors
@@ -154,9 +159,9 @@ public class ReforgeEditorGUI extends Screen {
                     String.valueOf(entry.amount()),
                     op, scaledBy, ratio
             ));
-        }
+    
 
-        //Pre-build custom appliesTo string from individual items and tags
+        //Pre-build custom appliesTo string from individual items, tags and exclusions
         List<String> customParts = new ArrayList<>();
         for (net.minecraft.world.item.Item item : reforge.getAppliesToItems()) {
             net.minecraft.resources.ResourceLocation rl =
@@ -167,16 +172,29 @@ public class ReforgeEditorGUI extends Screen {
                 : reforge.getAppliesToTags()) {
             customParts.add("#" + tag.location());
         }
+        // Exclusions – must be preserved so editing doesn't strip them
+        for (net.minecraft.world.item.Item item : reforge.getExcludeItems()) {
+            net.minecraft.resources.ResourceLocation rl =
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
+            if (rl != null) customParts.add("!" + rl);
+        }
+        for (String grp : reforge.getExcludeGroups())
+            customParts.add("!" + grp);
+        for (net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag
+                : reforge.getExcludeTags())
+            customParts.add("!#" + tag.location());
         this.initialCustomAppliesTo = String.join(", ", customParts);
 
         // Pre-fill checkbox state
         for (String g : GROUPS)
             savedCbState.put(g, reforge.getAppliesToGroups().contains(g));
+        }
     }
 
     /*****************************************************************************************************************************************************************
     Initialization
     *****************************************************************************************************************************************************************/
+
     @Override
     protected void init() {
         attrIdFields.clear();
@@ -186,7 +204,7 @@ public class ReforgeEditorGUI extends Screen {
         scaleRatioFields.clear();
 
         int cx   = this.width / 2;
-        int topY = 30;
+        int topY = 30;   // fixed – outer scroll applied via PoseStack in render()
         int lx   = cx - 190;
         int rx   = cx + 20;
 
@@ -200,7 +218,7 @@ public class ReforgeEditorGUI extends Screen {
         displayNameField = makeField(lx, topY + 50, "e.g. Corrupted", 64);
         weightField      = makeField(lx, topY + 86, "Default value: 100000", 10);
         weightField.setFilter(s -> s.isEmpty() || s.matches("\\d+"));
-        commentField     = makeField(lx, topY + 122, "Optional", 128);
+        commentField     = makeField(lx, topY + 122, "Optional", 256);
 
         if (!isNew) {
             displayNameField.setValue(editing.getName());
@@ -213,12 +231,12 @@ public class ReforgeEditorGUI extends Screen {
         this.addRenderableWidget(weightField);
         this.addRenderableWidget(commentField);
 
-        //*** Right column ("Applies To"-checkboxes) ******************************************************
+        //*** Right column ("Applies To"-checkboxes) **************************************************
         int col = 0;
         for (String group : GROUPS) {
             int x = rx + (col % 2) * 110;
             int y = topY + 14 + (col / 2) * 22;
-            //single source of truth - fixed old problem of relogging on every re-render
+            //single source of truth - fixed old problem of relogging on every re-ren
             boolean checked = savedCbState.getOrDefault(group, false);
             Checkbox cb = new Checkbox(x, y, 100, 20, Component.literal(group), checked);
             groupCheckboxes.put(group, cb);
@@ -233,7 +251,7 @@ public class ReforgeEditorGUI extends Screen {
             customAppliesToField.setValue(initialCustomAppliesTo);
         this.addRenderableWidget(customAppliesToField);
 
-        //*** Attribute Section******************************************************
+        //*** Attribute Section****************************************************
         int attrSectionY = Math.max(topY + 158, customY + 42) + 12;
 
         this.addRenderableWidget(Button.builder(Component.literal("+ Add Attribute"), btn -> {
@@ -246,7 +264,7 @@ public class ReforgeEditorGUI extends Screen {
         //panel measurements
         int panelLeft   = lx;
         int panelTop    = attrSectionY + 28;
-        int panelRight  = panelLeft + FIELD_WIDTH + 4 + 60 + 6 + 130;
+        int panelRight  = panelLeft + DEL_BTN_OFFSET_X + DEL_BTN_W;
         int panelBottom = panelTop + VISIBLE_ROWS * ROW_STRIDE;
 
         attrPanelLeft   = panelLeft;
@@ -268,7 +286,7 @@ public class ReforgeEditorGUI extends Screen {
             this.addRenderableWidget(idBox);
             attrIdFields.add(idBox);
 
-            //*** Value******************************************************
+            //*** Value ******************************************************
             EditBox valBox = new EditBox(this.font,
                     panelLeft + 4 + FIELD_WIDTH + 4, fieldY, 60, FIELD_HEIGHT, Component.empty());
             valBox.setMaxLength(16);
@@ -293,7 +311,7 @@ public class ReforgeEditorGUI extends Screen {
             this.addRenderableWidget(scaledByBox);
             scaledByFields.add(scaledByBox);
 
-            //*** "Scale Ratio" (only if operator = "SCALED")) ******************************************************
+            //*** "Scale Ratio" (only if operator = "SCALED")) **************************************************
             EditBox ratioBox = new EditBox(this.font,
                     panelLeft + 4 + FIELD_WIDTH + 4, fieldY + FIELD_HEIGHT + 12,
                     60, FIELD_HEIGHT, Component.empty());
@@ -306,10 +324,19 @@ public class ReforgeEditorGUI extends Screen {
             scaleRatioFields.add(ratioBox);
         }
 
-        //*** Buttons, fixed at the bottom ******************************************************
+        //*** Buttons, fixed at the bottom **************************************************
         int fixedBtnY = this.height - 28;
 
-        if (isNew) {
+        //*** Multiplayer: nur OP darf erstellen/bearbeiten/löschen - alle anderen bekommen einen
+        //    reinen Ansichts-Button. Die eigentliche Durchsetzung passiert serverseitig (EditReforgePacket).
+        boolean canEditNow = GUIConstructor.canEdit();
+
+        if (!canEditNow) {
+            saveButton   = null;
+            deleteButton = null;
+            cancelButton = Button.builder(Component.literal("Close"), btn -> this.onClose())
+                    .pos(cx - 40, fixedBtnY).size(80, 20).build();
+        } else if (isNew) {
             saveButton   = Button.builder(Component.literal("Save"), btn -> onSave())
                     .pos(cx - 52, fixedBtnY).size(50, 20).build();
             cancelButton = Button.builder(Component.literal("Cancel"), btn -> this.onClose())
@@ -325,15 +352,17 @@ public class ReforgeEditorGUI extends Screen {
                     btn -> this.onClose())
                     .pos(cx - 27, fixedBtnY).size(50, 20).build();
             deleteButton = Button.builder(
-                    Component.literal("Delete Reforge").withStyle(Style.EMPTY.withColor(0xFF5555)),
-                    btn -> onDelete())
+                    pendingDelete
+                        ? Component.literal("Confirm Delete").withStyle(Style.EMPTY.withColor(0xFF2222))
+                        : Component.literal("Delete Reforge").withStyle(Style.EMPTY.withColor(0xFF5555)),
+                    btn -> handleDeleteClick())
                     .pos(cx + 28, fixedBtnY).size(90, 20).build();
         }
 
-
-        //totalContentHeight increased by 100px to use the dropdown widget without problems (no additional 100px would lead to hidden/not rendered dropdown widget)
+           //totalContentHeight increased by 100px to use the dropdown widget without problems (no additional 100px would lead to hidden/not rendered dropdown widget)
         totalContentHeight = panelBottom + 12 + 100;
     }
+
 
     /*****************************************************************************************************************************************************************
     Attribute panel scroll helpers
@@ -497,7 +526,8 @@ public class ReforgeEditorGUI extends Screen {
             attrsJson.add(a);
         }
 
-        // Build and save
+        //*** Multiplayer: an den Server senden statt lokal zu speichern - nur der Server schreibt noch in
+        //    custom_reforges.json. OP ist erforderlich (wird serverseitig nochmal geprüft).
         JsonObject obj = new JsonObject();
         obj.addProperty("displayName", displayName);
         JsonArray arr = new JsonArray();
@@ -507,22 +537,41 @@ public class ReforgeEditorGUI extends Screen {
         obj.addProperty("comment", comment);
         obj.add("attributes", attrsJson);
 
-        if (ReforgeManager.saveCustomReforge(id, obj)) {
-            ReforgeManager.load();
-            refreshItemsWithReforge(id);
-            this.onClose();
+        if (!GUIConstructor.canEdit()) {
+            errorMessage = "Only server operators can edit reforges!";
+            return;
+        }
+
+        de.randomreforges.network.NetworkHandler.CHANNEL.sendToServer(
+                de.randomreforges.network.ServerBoundPackets.EditReforgePacket.save(id, obj));
+        this.onClose();
+    }
+
+    /*****************************************************************************************************************************************************************
+    Two-click delete confirmation.
+    If confirmDelete is disabled in settings, the first click deletes immediately.
+    Otherwise: first click sets pendingDelete, rebuild changes button label to "Confirm Delete".
+    Second click then executes the actual delete.
+    *****************************************************************************************************************************************************************/
+    private void handleDeleteClick() {
+        if (!de.randomreforges.reforge.ReforgeManager.isConfirmDelete() || pendingDelete) {
+            pendingDelete = false;
+            onDelete();
         } else {
-            errorMessage = "Failed to save! Check the logs.";
+            pendingDelete = true;
+            needsRebuild = true;
         }
     }
 
     private void onDelete() {
-        if (ReforgeManager.deleteCustomReforge(editing.getId())) {
-            ReforgeManager.load();
-            this.onClose();
-        } else {
-            errorMessage = "Cannot delete: only custom reforges can be deleted!";
+        if (!GUIConstructor.canEdit()) {
+            errorMessage = "Only server operators can edit reforges!";
+            return;
         }
+
+        de.randomreforges.network.NetworkHandler.CHANNEL.sendToServer(
+            de.randomreforges.network.ServerBoundPackets.EditReforgePacket.delete(editing.getId()));
+        this.onClose();
     }
 
     /*****************************************************************************************************************************************************************
@@ -537,8 +586,8 @@ public class ReforgeEditorGUI extends Screen {
         int lx   = cx - 190;
         int rx   = cx + 20;
 
-        //Flush deferred rebuild (safe to do here, outside widget iteration)
-        //No return after rebuild – continue rendering in the same frame to avoid flicker
+
+        //no return, return caused flickering
         if (needsRebuild) {
             needsRebuild = false;
             rebuildWidgets();
@@ -567,10 +616,11 @@ public class ReforgeEditorGUI extends Screen {
         graphics.fill(cx + 10, topY, cx + 11, topY + 175, 0x44FFFFFF);
 
         //*** Attribute panel ******************************************************
-        drawPanelBorder(graphics);
-        renderAttrScrollbar(graphics);
+        GUIConstructor.drawPanelBorder(graphics, attrPanelLeft, attrPanelTop, attrPanelRight + 10, attrPanelBottom);
+        GUIConstructor.renderPanelScrollbar(graphics, attrPanelTop, attrPanelBottom,
+                attrPanelRight + 10, attrScrollOffset, totalAttrContentHeight());
 
-        // Show/hide widgets based on visibility within panel, and detect Scaled toggle
+        //Show/hide widgets based on visibility within panel, and detect Scaled toggle
         int[] rowOffsets = computeRowOffsets();
         for (int i = 0; i < attrIdFields.size(); i++) {
             int fieldY  = attrPanelTop + rowOffsets[i] - attrScrollOffset + 10;
@@ -617,7 +667,7 @@ public class ReforgeEditorGUI extends Screen {
             //Hide "Operator" label if any dropdown is open and overlaps this row - rendering the dropdown widget on top of the text didnt work for some reason
             boolean operatorLabelHidden = attrDropdowns.stream().anyMatch(dd -> {
                 if (!dd.isOpen()) return false;
-                int ddBottom = dd.getY() + dd.getHeight() + dd.getOptions().size() * 14;
+                int ddBottom = dd.getY() + dd.getHeight() + dd.getOptions().size() * DropdownWidget.OPTION_HEIGHT;
                 return rowTop + 10 > dd.getY() + dd.getHeight() && rowTop < ddBottom;
             });
             if (!operatorLabelHidden)
@@ -632,6 +682,16 @@ public class ReforgeEditorGUI extends Screen {
                         attrPanelLeft + 4 + FIELD_WIDTH + 4,
                         rowTop + 10 + FIELD_HEIGHT + 2, LABEL_COLOR);
             }
+
+            //*** Delete button (remove attribute row) ******************************************************
+            int delBtnX = attrPanelLeft + DEL_BTN_OFFSET_X;
+            int delBtnY = rowTop + 10;
+            boolean delHov = mouseX >= delBtnX && mouseX <= delBtnX + DEL_BTN_W
+                    && (mouseY + screenScrollOffset) >= delBtnY
+                    && (mouseY + screenScrollOffset) <= delBtnY + FIELD_HEIGHT;
+            graphics.fill(delBtnX - 1, delBtnY - 1, delBtnX + DEL_BTN_W + 1, delBtnY + FIELD_HEIGHT + 1, 0xFF666666);
+            graphics.fill(delBtnX,     delBtnY,     delBtnX + DEL_BTN_W,     delBtnY + FIELD_HEIGHT,     delHov ? 0xFF772222 : 0xFF3A1A1A);
+            graphics.drawCenteredString(this.font, "\u2715", delBtnX + DEL_BTN_W / 2, delBtnY + (FIELD_HEIGHT - 8) / 2, 0xFFFF5555);
         }
 
         if (attrPanelBottom > attrPanelTop)
@@ -644,48 +704,14 @@ public class ReforgeEditorGUI extends Screen {
         //*** Close outer scroll ******************************************************
         graphics.disableScissor();
         graphics.pose().popPose();
-        renderOuterScrollbar(graphics);
+        GUIConstructor.renderOuterScrollbar(graphics, this.width, this.height, screenScrollOffset, totalContentHeight);
 
         //*** Fixed buttons at the bottom ******************************************************
-        saveButton.render(graphics, mouseX, mouseY, partialTick);
+        if (saveButton != null) saveButton.render(graphics, mouseX, mouseY, partialTick);
         cancelButton.render(graphics, mouseX, mouseY, partialTick);
         if (deleteButton != null) deleteButton.render(graphics, mouseX, mouseY, partialTick);
         if (!errorMessage.isEmpty())
             graphics.drawCenteredString(this.font, errorMessage, cx, this.height - 52, ERROR_COLOR);
-    }
-
-    private void renderOuterScrollbar(GuiGraphics g) {
-        if (!needsOuterScroll()) return;
-        int maxScroll = Math.max(1, totalContentHeight - this.height + 10);
-        int x      = this.width - 6;
-        int trackH = this.height;
-        int thumbH = Math.max(20, trackH * this.height / totalContentHeight);
-        int thumbY = (int) ((long) screenScrollOffset * (trackH - thumbH) / maxScroll);
-        g.fill(x, 0,      x + 4, this.height,    0x44FFFFFF);
-        g.fill(x, thumbY, x + 4, thumbY + thumbH, 0xAAFFFFFF);
-    }
-
-    private void drawPanelBorder(GuiGraphics g) {
-        if (attrPanelBottom <= attrPanelTop) return;
-        int r = attrPanelRight + 10;
-        g.fill(attrPanelLeft - 1, attrPanelTop - 1, r + 1, attrPanelTop,           0x88FFFFFF);
-        g.fill(attrPanelLeft - 1, attrPanelBottom,  r + 1, attrPanelBottom + 1,    0x88FFFFFF);
-        g.fill(attrPanelLeft - 1, attrPanelTop,     attrPanelLeft, attrPanelBottom, 0x88FFFFFF);
-        g.fill(r,                 attrPanelTop,     r + 1,         attrPanelBottom, 0x88FFFFFF);
-    }
-
-    private void renderAttrScrollbar(GuiGraphics g) {
-        int total   = totalAttrContentHeight();
-        int visible = visiblePanelHeight();
-        if (total <= visible || attrPanelBottom <= attrPanelTop) return;
-
-        int x      = attrPanelRight + 13;
-        int trackH = attrPanelBottom - attrPanelTop;
-        int thumbH = Math.max(12, trackH * visible / total);
-        int thumbY = attrPanelTop + (attrScrollOffset * (trackH - thumbH)) / maxAttrScroll();
-
-        g.fill(x, attrPanelTop, x + 4, attrPanelBottom, 0x44FFFFFF);
-        g.fill(x, thumbY,       x + 4, thumbY + thumbH,  0xAAFFFFFF);
     }
 
     /*****************************************************************************************************************************************************************
@@ -701,6 +727,21 @@ public class ReforgeEditorGUI extends Screen {
         if (cancelButton != null && cancelButton.mouseClicked(mouseX, mouseY, button)) return true;
         if (deleteButton != null && deleteButton.mouseClicked(mouseX, mouseY, button)) return true;
 
+        //*** Delete attribute row buttons ******************************************************
+        if (inPanel) {
+            int[] delOffsets = computeRowOffsets();
+            int delBtnX = attrPanelLeft + DEL_BTN_OFFSET_X;
+            for (int i = 0; i < attrData.size(); i++) {
+                int delBtnY = attrPanelTop + delOffsets[i] - attrScrollOffset + 10;
+                if (mouseX >= delBtnX && mouseX <= delBtnX + DEL_BTN_W
+                        && adjustedY >= delBtnY && adjustedY <= delBtnY + FIELD_HEIGHT) {
+                    syncAttrDataFromWidgets();
+                    attrData.remove(i);
+                    needsRebuild = true;
+                    return true;
+                }
+            }
+        }
 
         for (DropdownWidget dd : attrDropdowns) {
             if (!dd.isOpen()) continue;
@@ -729,8 +770,6 @@ public class ReforgeEditorGUI extends Screen {
 
     /*****************************************************************************************************************************************************************
     Helpers
-
-    TODO: makeField -> own file GUIHelpers?
     *****************************************************************************************************************************************************************/
     private EditBox makeField(int x, int y, String hint, int maxLen) {
         EditBox box = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.empty());
@@ -763,43 +802,6 @@ public class ReforgeEditorGUI extends Screen {
 
         int maxScroll = Math.max(0, totalContentHeight - this.height + 10);
         screenScrollOffset = Math.max(0, Math.min(screenScrollOffset, maxScroll));
-    }
-
-    /*****************************************************************************************************************************************************************
-    Task: Refresh all reforged items with the edited reforge
-
-    Problem used to be that the reforges changed in the tooltip (ReforgeManager.load()) but the attributes didnt get applied without applying the reforge again (/reforge, Reforge Cage).
-    1. Iterate through every players inventory and check for the items with the reforge ID.
-    2. If item found
-    2.1 Remove attributes
-    2.2 Apply attributes (CuriosAPI handles the Curios items)
-    *****************************************************************************************************************************************************************/
-    private void refreshItemsWithReforge(String reforgeId) {
-        if (this.minecraft == null) return;
-        var server = this.minecraft.getSingleplayerServer();
-        if (server == null) return;
-
-        for (var player : server.getPlayerList().getPlayers()) {
-            for (var slot : net.minecraft.world.entity.EquipmentSlot.values()) {
-                net.minecraft.world.item.ItemStack stack = player.getItemBySlot(slot);
-                if (stack.isEmpty()) continue;
-
-                net.minecraft.nbt.CompoundTag tag = stack.getTag();
-                if (tag == null || !tag.contains("RandomReforges")) continue;
-
-                de.randomreforges.reforge.ReforgeInstance inst =
-                        de.randomreforges.reforge.ReforgeInstance.fromNBT(tag.getCompound("RandomReforges"));
-                if (inst == null || !inst.getReforge().getId().equals(reforgeId)) continue;
-
-                boolean isCurio = net.minecraftforge.fml.ModList.get().isLoaded("curios")
-                        && de.randomreforges.curios.CuriosUtil.isCurioItem(stack);
-
-                de.randomreforges.reforge.AttributeUtil.removeAttributes(stack);
-                if (!isCurio) {
-                    de.randomreforges.reforge.AttributeUtil.applyAttributes(stack, inst, player);
-                }
-            }
-        }
     }
 
     @Override

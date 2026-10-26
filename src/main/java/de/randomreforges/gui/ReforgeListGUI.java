@@ -1,6 +1,7 @@
 package de.randomreforges.gui;
 
 import java.util.List;
+import de.randomreforges.gui.ReforgeSelectionList;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -33,9 +34,13 @@ public class ReforgeListGUI extends Screen {
         this.addRenderableWidget(list);
 
         //*** Top-right buttons ******************************************************
-        this.addRenderableWidget(Button.builder(Component.literal("+"),
+        //in multiplayer op required for some functions
+        Button createButton = Button.builder(Component.literal("+"),
                         btn -> this.minecraft.setScreen(new ReforgeEditorGUI()))
-                .pos(this.width - 28, 6).size(20, 20).build());
+                .pos(this.width - 28, 6).size(20, 20).build();
+        createButton.visible = GUIConstructor.canEdit();
+        createButton.active  = GUIConstructor.canEdit();
+        this.addRenderableWidget(createButton);
 
         this.addRenderableWidget(Button.builder(Component.literal("⚙"),
                         btn -> this.minecraft.setScreen(new SettingsGUI()))
@@ -75,6 +80,15 @@ public class ReforgeListGUI extends Screen {
     }
 
     /*****************************************************************************************************************************************************************
+    required for ClientSyncHandler
+    *****************************************************************************************************************************************************************/
+    public void refreshList() {
+        if (list != null && searchField != null && searchMode != null) {
+            list.refresh(searchField.getValue(), searchMode.getSelected());
+        }
+    }
+
+    /*****************************************************************************************************************************************************************
     Render
     *****************************************************************************************************************************************************************/
 
@@ -100,7 +114,7 @@ public class ReforgeListGUI extends Screen {
     private void renderUpwardDropdown(GuiGraphics graphics, int mouseX, int mouseY) {
         if (searchMode == null || !searchMode.isOpen()) return;
 
-        int optH    = 14;
+        int optH    = DropdownWidget.OPTION_HEIGHT;
         int x       = searchMode.getX();
         int w       = searchMode.getWidth();
         int baseY   = searchMode.getY();
@@ -128,7 +142,7 @@ public class ReforgeListGUI extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (searchMode != null && searchMode.isOpen()) {
             // Check if a list option was clicked
-            int optH    = 14;
+            int optH    = DropdownWidget.OPTION_HEIGHT;
             int x       = searchMode.getX();
             int w       = searchMode.getWidth();
             int baseY   = searchMode.getY();
@@ -153,7 +167,6 @@ public class ReforgeListGUI extends Screen {
 
         boolean result = super.mouseClicked(mouseX, mouseY, button);
 
-        applyFilter();
         return result;
     }
 

@@ -29,7 +29,6 @@ public class ReforgeCageBlock extends BaseEntityBlock {
         return new ReforgeCageBlockEntity(pos, state);
     }
 
-    
     /*****************************************************************************************************************************************************************
     Block properties:
     - non-solid
@@ -38,33 +37,26 @@ public class ReforgeCageBlock extends BaseEntityBlock {
     - completely transparent for light
     *****************************************************************************************************************************************************************/
 
-    
-    public boolean isSolidRender(BlockState state, BlockGetter level, BlockPos pos) {
-        return false;
-    }
+    public boolean isSolidRender(BlockState state, BlockGetter level, BlockPos pos) { return false; }
 
     @Override
-    public boolean useShapeForLightOcclusion(BlockState state) {
-        return false;
-    }
+    public boolean useShapeForLightOcclusion(BlockState state) { return false; }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
-        return true;
-    }
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) { return true; }
 
     @Override
-    public int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
-        return 0;
-    }
+    public int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) { return 0; }
 
 
-    
-    /*****************************************************************************************************************************************************************
+/*****************************************************************************************************************************************************************
     Task: Rightclick Reforge Cage BE to reroll the reforge on the held item (Logic server-side only)
     1.    Check if the item is already reforged
           - prevents trying to reforge items that cant have reforges
-          - prevents trying to reforge items that got their reforge cleard with /reforge <player> clear
+          - prevents trying to reforge items that got their reforge cleared with /reforge <player> clear
+    1.1   Check if the reforge is locked via /reforge <player> lock
+          - locked items cannot be rerolled at the Reforge Cage
+          - the lock can only be bypassed by /reforge <player> apply
     2.    Get all the costs (saved in config/randomreforges/settings.json, ReforgeManager reads them)
     2.1   Case 1:    No costs (xp = 0 or xp = null, items = null) -> go to 5 (skip material and Creative mode check)
     2.2   Case 2:    Costs something -> go to next step
@@ -79,8 +71,10 @@ public class ReforgeCageBlock extends BaseEntityBlock {
     7.    Check if CuriosAPI is loaded (They have their own attribute appliance and is handled completely by CuriosAPI itself. Check out java/de/randomreforges/curios)
     8.    Remove attributes from old reforge
     9.    If the item isnt a Curio, apply the new reforge
-    (some sounds)
+    10.   Hardmode: roll lock chance – if triggered, lock the item so it can't be reforged again at the cage
+
     *****************************************************************************************************************************************************************/
+
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos,
                                  Player player, InteractionHand hand,
@@ -90,15 +84,28 @@ public class ReforgeCageBlock extends BaseEntityBlock {
 
         ItemStack held = player.getItemInHand(hand);
 
-        
         CompoundTag tag = held.getTag();
         if (tag == null || !tag.contains("RandomReforges")) {
             return InteractionResult.PASS;
         }
 
-        ReforgeInstance inst = ReforgeInstance.fromNBT(tag.getCompound("RandomReforges"));
-        if (inst == null) {
-            return InteractionResult.PASS;
+        // Locked reforges cannot be rerolled at the Reforge Cage.
+        if (tag.getBoolean("ReforgeLocked")) {
+            player.sendSystemMessage(
+                net.minecraft.network.chat.Component.literal("This reforge is locked. Use /reforge apply to override it.")
+                    .withStyle(net.minecraft.network.chat.Style.EMPTY.withColor(0xFF5555).withItalic(false))
+            );
+            return InteractionResult.FAIL;
+        }
+
+        var slot = AttributeUtil.detectSlot(held);
+        Reforge newReforge = ReforgeManager.getRandomApplicableReforge(held, slot);
+        if (newReforge == null) {
+            player.sendSystemMessage(
+                net.minecraft.network.chat.Component.literal("No applicable reforges available (all locked?)")
+                    .withStyle(net.minecraft.network.chat.Style.EMPTY.withColor(0xFF5555).withItalic(false))
+            );
+            return InteractionResult.FAIL;
         }
 
         int    costLevels = ReforgeManager.getRerollCostLevels();
@@ -134,19 +141,27 @@ public class ReforgeCageBlock extends BaseEntityBlock {
             }
         }
 
-        var slot = AttributeUtil.detectSlot(held);
-        Reforge newReforge = ReforgeManager.getRandomApplicableReforge(held, slot);
-        if (newReforge == null) return InteractionResult.PASS;
-
         if (!player.isCreative()) {
             if (needLevels) player.giveExperienceLevels(-costLevels);
             if (needItem)   consumeCostItem(player, costItem, costAmount);
         }
 
-        ReforgeInstance newInst = new ReforgeInstance(newReforge);
+        //Roll perfect chance + per-attribute debuff multipliers (hardmode)
+        ReforgeInstance newInst = new ReforgeInstance(
+                newReforge,
+                ReforgeManager.rollPerfect(),
+                ReforgeManager.rollDebuffMultipliers(newReforge)
+        );
 
         tag.put("RandomReforges", newInst.serializeNBT());
         held.setTag(tag);
+
+        // Grant "Perfect Match!" advancement if this is a perfect reforge
+        if (newInst.isPerfect() && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+            var adv = sp.getServer().getAdvancements()
+                    .getAdvancement(new net.minecraft.resources.ResourceLocation("randomreforges", "perfect_reforge"));
+            if (adv != null) sp.getAdvancements().award(adv, "got_perfect_reforge");
+        }
 
         held.setHoverName(newInst.getDisplayName(held));
 
@@ -156,6 +171,16 @@ public class ReforgeCageBlock extends BaseEntityBlock {
         AttributeUtil.removeAttributes(held);
         if (!isCurio) {
             AttributeUtil.applyAttributes(held, newInst);
+        }
+
+        //*** Hardmode: random chance to permanently lock the item after reforging ******************************************************
+        if (ReforgeManager.rollHardmodeLock()) {
+            tag.putBoolean("ReforgeLocked", true);
+            held.setTag(tag);
+            player.sendSystemMessage(
+                net.minecraft.network.chat.Component.literal("\u2620 Hardmode: This reforge is now permanent!")
+                    .withStyle(net.minecraft.network.chat.Style.EMPTY.withColor(0xFF2222).withItalic(false))
+            );
         }
 
         level.playSound(null, pos,
@@ -172,8 +197,7 @@ public class ReforgeCageBlock extends BaseEntityBlock {
     }
 
     /*****************************************************************************************************************************************************************
-    Task: Find the stack with the items needed to reroll (needed to remove them after Reforge Cage BE interaction)
-    Works with tags (filtering if it starts with "#") and item IDs
+    Task: Find the stack with the items needed to reroll
     *****************************************************************************************************************************************************************/
     private net.minecraft.world.item.ItemStack findCostItem(Player player, String itemStr, int amount) {
         if (itemStr.startsWith("#")) {
@@ -185,7 +209,7 @@ public class ReforgeCageBlock extends BaseEntityBlock {
                 net.minecraft.world.item.ItemStack s = player.getInventory().getItem(i);
                 if (!s.isEmpty() && s.is(tag)) found += s.getCount();
             }
-            if (found >= amount) return net.minecraft.world.item.ItemStack.EMPTY; // dummy non-null
+            if (found >= amount) return net.minecraft.world.item.ItemStack.EMPTY;
         } else {
             net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM
                 .get(new net.minecraft.resources.ResourceLocation(itemStr));
@@ -201,8 +225,7 @@ public class ReforgeCageBlock extends BaseEntityBlock {
     }
 
     /*****************************************************************************************************************************************************************
-    Task: Consume the items needed to reroll (used for Reforge Cage BE interaction)
-    Clears the item slots detected by findCostItem
+    Task: Consume the items needed to reroll
     *****************************************************************************************************************************************************************/
     private void consumeCostItem(Player player, String itemStr, int amount) {
         int remaining = amount;

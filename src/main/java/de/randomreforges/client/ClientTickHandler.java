@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 
 
 /*****************************************************************************************************************************************************************
-This is mainly used for Scaling Reforges (like spellbooks_cursed) and to open the GUI
+main use scaling reforges and opening gui
 *****************************************************************************************************************************************************************/
 
 @Mod.EventBusSubscriber(modid = RandomReforges.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)

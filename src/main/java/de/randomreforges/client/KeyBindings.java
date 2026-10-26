@@ -12,10 +12,10 @@ import de.randomreforges.RandomReforges;
 public class KeyBindings {
 
     public static final KeyMapping OPEN_REFORGE_GUI = new KeyMapping(
-            "key.randomreforges.open_reforge_gui",      // lang key
+            "key.randomreforges.open_reforge_gui",        // lang key
             InputConstants.Type.KEYSYM,
-            InputConstants.KEY_R,                        // default: R
-            "key.categories.randomreforges"             // category
+            InputConstants.KEY_R,                                   // default: R
+            "key.categories.randomreforges"               // category
     );
 
     @SubscribeEvent

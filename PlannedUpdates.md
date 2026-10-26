@@ -51,13 +51,19 @@ _Please note that this mainly for me, so most of the planned stuff will be in Ge
   - Events triggering client- and serverside 
   - "ANY" selection in the reforge editor ignored the blacklisted items in the textfield
   
-# Planned Updates
-
 ## Version 3.3
 - Hardmode
   - Items become randomly unreforgable
   - Configurable in SettingsGUI (Activate/Deactivate, Chance)
 
 ## Version 4.0
-- Server compat
-   - I dont know how to test multiplayer stuff (anyone knows a free webhost except aternos?)
+- Server compat (Major update)
+ 
+## Version 4.1
+- Search function in the menus
+- Collapsible entries in the menus
+- New setting that allows to block reforging on equip
+
+## Version 4.2
+- Default reforge list (including black- and whitelisting)
+- Feedback if a reforge cant appear (Weight 0, no target given (including invalid id))

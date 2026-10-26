@@ -73,6 +73,13 @@ public class EmptyReforgeCageBlock extends Block {
 
             level.setBlock(pos, BlockRegistry.REFORGE_CAGE.get().defaultBlockState(), 3);
 
+            // Grant "Another "ethical" villager prison..." advancement
+            if (!level.isClientSide && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+                var adv = sp.getServer().getAdvancements()
+                        .getAdvancement(new net.minecraft.resources.ResourceLocation("randomreforges", "reforge_cage"));
+                if (adv != null) sp.getAdvancements().award(adv, "placed_reforge_cage");
+            }
+
             if (!player.isCreative()) {
                 held.shrink(1);
             }

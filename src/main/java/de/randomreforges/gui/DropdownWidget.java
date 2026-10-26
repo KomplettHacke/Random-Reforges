@@ -22,7 +22,7 @@ public class DropdownWidget extends AbstractWidget {
     private int selectedIndex = 0;
     private boolean open = false;
 
-    private static final int OPTION_HEIGHT = 14;
+    static final int OPTION_HEIGHT = 14;
     private static final int BG_COLOR      = 0xFF2A2A2A;
     private static final int HOVER_COLOR   = 0xFF444444;
     private static final int BORDER_COLOR  = 0xFF888888;

@@ -10,7 +10,7 @@ public class CurioEquipEvents {
 
     @SubscribeEvent
     public static void onCurioEquip(CurioChangeEvent event) {
-        if (!event.getFrom().isEmpty()) return;
+
 
         ItemStack stack = event.getTo();
         if (stack.isEmpty()) return;
